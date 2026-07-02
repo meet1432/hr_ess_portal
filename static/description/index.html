@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Self-Service Portal (ESS) for Odoo 19</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f9f9f9;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            background: white;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #6b4c7a;
+            margin-bottom: 0.5rem;
+            border-bottom: 3px solid #6b4c7a;
+            padding-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #354224;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #6b4c7a;
+            padding-left: 1rem;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: #5a3e68;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .objectives {
+            background: #f0ebe8;
+            border-left: 4px solid #6b4c7a;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+
+        .objectives ul {
+            list-style: none;
+            margin: 0;
+        }
+
+        .objectives li {
+            margin-bottom: 0.8rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .objectives li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .objectives strong {
+            color: #6b4c7a;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-card {
+            border: 2px solid #e0e0e0;
+            padding: 1.5rem;
+            border-radius: 4px;
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: #6b4c7a;
+            box-shadow: 0 4px 12px rgba(107, 76, 122, 0.15);
+            background: #fff;
+        }
+
+        .feature-card h3 {
+            margin-top: 0;
+            color: #6b4c7a;
+        }
+
+        .feature-card p {
+            margin: 0;
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .benefits {
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin: 2rem 0;
+        }
+
+        .benefits h3 {
+            margin-top: 0;
+            color: #065f46;
+        }
+
+        .benefits ul {
+            list-style-position: inside;
+            color: #065f46;
+        }
+
+        .benefits li {
+            margin-bottom: 0.6rem;
+        }
+
+        .technical {
+            background: #f3f4f6;
+            border-left: 4px solid #6b4c7a;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 4px;
+        }
+
+        .tech-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .tech-item {
+            padding: 0.8rem;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 3px;
+        }
+
+        .tech-item strong {
+            color: #6b4c7a;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .security-box {
+            background: #fee2e2;
+            border: 2px solid #dc2626;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin: 2rem 0;
+        }
+
+        .security-box h3 {
+            color: #7f1d1d;
+            margin-top: 0;
+        }
+
+        .security-box ul {
+            list-style-position: inside;
+            color: #7f1d1d;
+        }
+
+        .security-box li {
+            margin-bottom: 0.5rem;
+        }
+
+        .cta-box {
+            background: #6b4c7a;
+            color: white;
+            padding: 2rem;
+            border-radius: 4px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .cta-box h3 {
+            color: white;
+            margin-top: 0;
+        }
+
+        .cta-box p {
+            margin: 1rem 0 0 0;
+            font-size: 0.95rem;
+        }
+
+        .cta-box a {
+            display: inline-block;
+            margin-top: 1rem;
+            background: white;
+            color: #6b4c7a;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            border-radius: 3px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+
+        .cta-box a:hover {
+            transform: translateY(-2px);
+        }
+
+        .requirements {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin: 2rem 0;
+        }
+
+        .requirements h3 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .requirements ul {
+            list-style-position: inside;
+            color: #92400e;
+        }
+
+        .requirements li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .logo-badge {
+            display: inline-block;
+            background: #6b4c7a;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .screenshots {
+            margin: 3rem 0;
+        }
+
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .screenshot-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        .screenshot-item:hover {
+            border-color: #6b4c7a;
+            box-shadow: 0 4px 12px rgba(107, 76, 122, 0.15);
+        }
+
+        .screenshot-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            background: #fff;
+        }
+
+        .screenshot-caption {
+            padding: 1rem;
+            background: white;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .screenshot-caption strong {
+            color: #6b4c7a;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem 1rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .features-grid,
+            .tech-items {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Self-Service Portal (ESS)</h1>
+        <p class="subtitle">Modern Neo-Brutalist Employee Self-Service Portal for Odoo 19 Enterprise Edition</p>
+
+        <!-- Key Objectives -->
+        <div class="objectives">
+            <h2 style="margin-top: 0; border: none; padding: 0;">💡 Key Objectives</h2>
+            <ul>
+                <li><strong>Reduce Internal User License Costs</strong> — Portal users don't require Odoo internal user licenses, saving significant costs while maintaining full HR functionality</li>
+                <li><strong>Improve Employee Experience</strong> — Intuitive, self-service workflows reduce HR department burden</li>
+                <li><strong>Enhance Data Accessibility</strong> — Employees can access their HR data 24/7 without HR intervention</li>
+                <li><strong>Streamline HR Processes</strong> — Automated workflows for leave, attendance, and expenses</li>
+                <li><strong>Maintain Security</strong> — Enterprise-grade row-level security ensures data isolation</li>
+            </ul>
+        </div>
+
+        <!-- Core Features -->
+        <h2>🎯 Core Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>📋 Leave Management</h3>
+                <p>Request, track, and manage leave with approval workflows. View leave balance by type, refuse requests with notes, and automatic calculations.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>🕐 Attendance Tracking</h3>
+                <p>Clock in/out directly from portal, view attendance history, and request attendance corrections with automatic worked hours calculation.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>💰 Payslips</h3>
+                <p>Download payslips as PDF, view payment history, and search records by date range for complete compensation transparency.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>💳 Expense Management</h3>
+                <p>Submit expense claims with receipt attachments, track reimbursement status, and manage documentation securely.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>⏱️ Timesheets</h3>
+                <p>Weekly timesheet calendar view with hourly logging by project and task. Quick-add buttons, modal editing, and submit for approval.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>📊 Projects & Tasks</h3>
+                <p>Browse active projects, view assigned tasks with priority, track progress, and filter by project for better work visibility.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>📈 Dashboard</h3>
+                <p>Leave request status overview, pending approvals count, quick-action buttons, attendance indicators, and weekly hours summary.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>🎨 Neo-Brutalist Design</h3>
+                <p>Bold borders, minimal styling, high contrast typography, and mobile-responsive layouts for a modern user experience.</p>
+            </div>
+        </div>
+
+        <!-- Benefits -->
+        <div class="benefits">
+            <h3>✨ Why Choose ESS Portal?</h3>
+            <ul>
+                <li><strong>Clean Design</strong> — Neo-Brutalist aesthetic with intuitive navigation</li>
+                <li><strong>Mobile Ready</strong> — Fully responsive design works seamlessly on all devices</li>
+                <li><strong>Secure by Default</strong> — Row-level access control, users see only their data</li>
+                <li><strong>Developer Friendly</strong> — Built on Odoo 19 portal framework with clean, documented code</li>
+                <li><strong>Easy to Customize</strong> — Well-documented, modular architecture for easy extensions</li>
+                <li><strong>Cost Effective</strong> — No additional license costs for portal users</li>
+            </ul>
+        </div>
+
+        <!-- Requirements -->
+        <div class="requirements">
+            <h3>📋 Requirements</h3>
+            <ul>
+                <li>Odoo 19 Enterprise Edition</li>
+                <li>Python 3.8+</li>
+                <li>PostgreSQL 12+</li>
+                <li>Modules: base, portal, mail, hr, hr_attendance, hr_holidays, hr_expense, hr_payroll, account, project, hr_timesheet</li>
+            </ul>
+        </div>
+
+        <!-- Technical Details -->
+        <div class="technical">
+            <h3>⚙️ Technical Stack</h3>
+            <div class="tech-items">
+                <div class="tech-item">
+                    <strong>Framework</strong>
+                    Odoo 19 Portal
+                </div>
+                <div class="tech-item">
+                    <strong>Frontend</strong>
+                    OWL 3 + Vanilla JS
+                </div>
+                <div class="tech-item">
+                    <strong>Database</strong>
+                    PostgreSQL
+                </div>
+                <div class="tech-item">
+                    <strong>Security</strong>
+                    Row-level ir.rule
+                </div>
+            </div>
+        </div>
+
+        <!-- Security -->
+        <div class="security-box">
+            <h3>🔐 Security Features</h3>
+            <ul>
+                <li>Portal-based role-based access control</li>
+                <li>Row-level security rules per model</li>
+                <li>Users see only their own records</li>
+                <li>CSRF protection on all AJAX calls</li>
+                <li>Input validation on backend</li>
+                <li>HTML/JavaScript output encoding</li>
+                <li>Strict domain filtering on queries</li>
+            </ul>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="cta-box">
+            <h3>Ready to Get Started?</h3>
+            <p>Install the Employee Self-Service Portal today and start reducing license costs while improving employee experience.</p>
+            <a href="javascript:void(0)">Install Module →</a>
+        </div>
+
+        <!-- Screenshots -->
+        <div class="screenshots">
+            <h2>📸 Screenshots</h2>
+            <div class="screenshots-grid">
+                <div class="screenshot-item">
+                    <img src="../../../screenshots/01-dashboard.png" alt="Dashboard Overview">
+                    <div class="screenshot-caption">
+                        <strong>Dashboard</strong>
+                        Quick overview of pending requests and key metrics
+                    </div>
+                </div>
+
+                <div class="screenshot-item">
+                    <img src="../../../screenshots/02-leave-request.png" alt="Leave Request">
+                    <div class="screenshot-caption">
+                        <strong>Leave Management</strong>
+                        Request leave with approval workflow
+                    </div>
+                </div>
+
+                <div class="screenshot-item">
+                    <img src="../../../screenshots/03-attendance-clock.png" alt="Attendance Clock">
+                    <div class="screenshot-caption">
+                        <strong>Attendance Tracking</strong>
+                        Clock in/out and track hours
+                    </div>
+                </div>
+
+                <div class="screenshot-item">
+                    <img src="../../../screenshots/05-timesheet-weekly.png" alt="Weekly Timesheet">
+                    <div class="screenshot-caption">
+                        <strong>Timesheets</strong>
+                        Weekly calendar view with project tracking
+                    </div>
+                </div>
+
+                <div class="screenshot-item">
+                    <img src="../../../screenshots/07-payslips.png" alt="Payslips">
+                    <div class="screenshot-caption">
+                        <strong>Payslips</strong>
+                        View and download payslips as PDF
+                    </div>
+                </div>
+
+                <div class="screenshot-item">
+                    <img src="../../../screenshots/08-expense-form.png" alt="Expense Claims">
+                    <div class="screenshot-caption">
+                        <strong>Expense Management</strong>
+                        Submit and track reimbursement claims
+                    </div>
+                </div>
+
+                <div class="screenshot-item">
+                    <img src="../../../screenshots/09-projects.png" alt="Projects">
+                    <div class="screenshot-caption">
+                        <strong>Projects & Tasks</strong>
+                        Browse and track assigned work
+                    </div>
+                </div>
+
+                <div class="screenshot-item">
+                    <img src="../../../screenshots/11-calender-view.png" alt="Calendar View">
+                    <div class="screenshot-caption">
+                        <strong>Leave Calendar</strong>
+                        Visual calendar with leave tracking
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support & Resources -->
+        <h2>📚 Support & Resources</h2>
+        <p><strong>Documentation:</strong> Complete documentation, API endpoints, and customization guides are available on <a href="https://github.com/meet1432/hr-ess-portal" target="_blank">GitHub</a></p>
+        <p><strong>Open Source:</strong> Fully open-source under LGPL-3 license with contribution guidelines</p>
+        <p><strong>Community:</strong> Join our community on GitHub Discussions for questions and feature requests</p>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><span class="logo-badge">ODOO 19</span><span class="logo-badge">HR</span><span class="logo-badge">PORTAL</span></p>
+            <p>Employee Self-Service Portal v19.0.1.0.0</p>
+            <p>© 2024 DRC Systems. Licensed under LGPL-3</p>
+            <p><a href="https://github.com/meet1432/hr-ess-portal" style="color: #6b4c7a;">View on GitHub</a></p>
+        </div>
+    </div>
+</body>
+</html>

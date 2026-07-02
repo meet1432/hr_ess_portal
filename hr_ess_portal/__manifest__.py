@@ -37,6 +37,9 @@
     'website': 'https://github.com/meet1432/hr-ess-portal',
     'category': 'Human Resources',
     'license': 'LGPL-3',
+    'images': [
+        'static/description/cover.png',
+    ],
     'depends': [
         'base',
         'portal',

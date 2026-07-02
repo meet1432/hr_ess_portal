@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ── Leave list ───────────────────────────────────────────────── -->
+    <template id="portal_leaves" name="ESS Leaves">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <div class="ess-page-header">
+                <h1>Leave Requests</h1>
+                <a class="ess-btn ess-btn--primary" href="/my/leaves/new">
+                    + New Request
+                </a>
+            </div>
+
+            <div class="ess-bento" style="margin-bottom: 1.5rem;">
+                <!-- Leave balance cards -->
+                <t t-foreach="allocations" t-as="alloc">
+                    <div class="ess-card">
+                        <div class="ess-card__label">
+                            <t t-esc="alloc.holiday_status_id.name"/>
+                        </div>
+                        <div class="ess-card__value">
+                            <t t-esc="'%.1f' % (alloc.number_of_days_display or 0)"/>
+                        </div>
+                        <div class="ess-card__sub">
+                            / <t t-esc="'%.1f' % (alloc.number_of_days or 0)"/> Days
+                        </div>
+                        <div class="ess-leave-bar" style="margin-top:.75rem;">
+                            <div class="ess-leave-bar__fill"
+                                 t-att-style="'width: ' + str(min(100, int((alloc.number_of_days_display or 0) / max(1, alloc.number_of_days) * 100))) + '%'"/>
+                        </div>
+                    </div>
+                </t>
+            </div>
+
+            <t t-if="error">
+                <div class="ess-card" style="margin-bottom:1rem;border-color:#b00020;color:#b00020;">
+                    <t t-esc="error"/>
+                </div>
+            </t>
+
+            <!-- Filter row: tabs + search + date range + actions -->
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;">
+                <div style="display:flex;flex-direction:column;gap:.75rem;flex:1;">
+                    <div class="ess-chips">
+                        <a t-att-href="'/my/leaves?state_filter=all'"
+                           t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'all' else '')">All</a>
+                        <a t-att-href="'/my/leaves?state_filter=confirm'"
+                           t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'confirm' else '')">To Approve</a>
+                        <a t-att-href="'/my/leaves?state_filter=validate'"
+                           t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'validate' else '')">Approved</a>
+                        <a t-att-href="'/my/leaves?state_filter=refuse'"
+                           t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'refuse' else '')">Refused</a>
+                    </div>
+                    <form method="get" action="/my/leaves" style="display:flex;gap:1rem;align-items:center;">
+                        <input type="hidden" name="state_filter" t-att-value="state_filter"/>
+                        <input type="search" name="q" placeholder="Search by leave type..." class="ess-input" style="flex:1;min-width:220px;" t-att-value="q or ''"/>
+                        <input type="date" name="date_from" class="ess-input" style="min-width:140px;" t-att-value="date_from or ''"/>
+                        <input type="date" name="date_to" class="ess-input" style="min-width:140px;" t-att-value="date_to or ''"/>
+                        <select name="grouping" class="ess-select" style="max-width:220px;">
+                            <option value="none" t-att-selected="'selected' if grouping == 'none' else ''">No Grouping</option>
+                            <option value="date" t-att-selected="'selected' if grouping == 'date' else ''">By Date</option>
+                            <option value="month" t-att-selected="'selected' if grouping == 'month' else ''">By Month</option>
+                        </select>
+                        <button type="submit" class="ess-btn">Apply</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="ess-card" style="box-shadow:none;padding:0;">
+                <table class="ess-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Days</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-if="not leaves">
+                            <tr>
+                                <td colspan="6" style="text-align:center;color:#888;padding:2rem;">
+                                    No leave requests found.
+                                </td>
+                            </tr>
+                        </t>
+                        <t t-foreach="leaves" t-as="leave">
+                            <tr>
+                                <td><strong><t t-esc="leave.holiday_status_id.name"/></strong></td>
+                                <td><t t-esc="leave.date_from and leave.date_from.strftime('%Y-%m-%d') or ''"/></td>
+                                <td><t t-esc="leave.date_to and leave.date_to.strftime('%Y-%m-%d') or ''"/></td>
+                                <td><t t-esc="leave.number_of_days"/></td>
+                                <td>
+                                    <span t-att-class="'ess-badge ess-badge--' + leave.state">
+                                        <t t-esc="leave.state"/>
+                                    </span>
+                                </td>
+                                <td>
+                                    <t t-if="leave.state in ('draft', 'confirm')">
+                                        <button class="ess-btn ess-btn--danger"
+                                                style="padding:.3rem .7rem;font-size:.72rem;"
+                                                t-att-data-leave-id="leave.id"
+                                                onclick="cancelLeave(this)">
+                                            Cancel
+                                        </button>
+                                    </t>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pager -->
+            <t t-if="pager and pager.get('page_count', 1) > 1">
+                <div style="margin-top:1.5rem;display:flex;gap:.5rem;">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+
+            <script>
+                async function cancelLeave(btn) {
+                    const leaveId = btn.dataset.leaveId;
+                    if (!confirm('Cancel this leave request?')) return;
+                    const resp = await fetch('/my/leaves/cancel', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({jsonrpc:'2.0',method:'call',id:1,
+                            params:{leave_id: parseInt(leaveId)}})
+                    });
+                    const data = await resp.json();
+                    if (data.result &amp;&amp; data.result.success) {
+                        window.location.reload();
+                    } else {
+                        alert((data.result &amp;&amp; data.result.error) || 'Failed to cancel leave.');
+                    }
+                }
+            </script>
+        </t>
+    </template>
+
+    <!-- ── Leave create form ────────────────────────────────────────── -->
+    <template id="portal_leave_new" name="ESS New Leave">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <div class="ess-page-header">
+                <h1>New Leave Request</h1>
+                <a class="ess-btn" href="/my/leaves">← Back</a>
+            </div>
+
+            <div class="ess-card js-leave-wizard" style="max-width:580px;">
+                <t t-if="error">
+                    <div class="ess-card" style="margin-bottom:1rem;border-color:#b00020;color:#b00020;box-shadow:none;">
+                        <t t-esc="error"/>
+                    </div>
+                </t>
+                <form action="/my/leaves/new" method="post">
+                    <input type="hidden" name="csrf_token"
+                           t-att-value="request.csrf_token()"/>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="leave_type_id">Leave Type</label>
+                        <select class="ess-select" name="leave_type_id" id="leave_type_id" required="required">
+                            <option value="">— Select —</option>
+                            <t t-foreach="leave_types" t-as="lt">
+                                <option t-att-value="lt.id"
+                                        t-att-data-balance="lt.virtual_remaining_leaves">
+                                    <t t-esc="lt.name"/>
+                                    (<t t-esc="lt.virtual_remaining_leaves"/> days left)
+                                </option>
+                            </t>
+                        </select>
+                        <div class="js-balance-hint"
+                             style="font-size:.75rem;color:#555;margin-top:.3rem;"/>
+                    </div>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="date_from">From</label>
+                        <input class="ess-input" type="date" name="date_from"
+                               id="date_from" required="required"/>
+                    </div>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="date_to">To</label>
+                        <input class="ess-input" type="date" name="date_to"
+                               id="date_to" required="required"/>
+                        <div class="js-day-count"
+                             style="font-size:.75rem;color:#555;margin-top:.3rem;"/>
+                        <div class="js-past-warn"
+                             style="display:none;font-size:.75rem;color:#c07000;margin-top:.3rem;">
+                            ⚠ Start date is in the past — verify before submitting.
+                        </div>
+                    </div>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="name">Reason (optional)</label>
+                        <textarea class="ess-textarea" name="name" id="name"
+                                  rows="3" placeholder="Brief description…"/>
+                    </div>
+
+                    <div style="display:flex;gap:.75rem;align-items:center;">
+                        <button class="ess-btn ess-btn--primary" type="submit">
+                            Submit Request
+                        </button>
+                        <a class="ess-btn" href="/my/leaves">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    views/portal_dashboard_templates.xml
+    =====================================
+    Main ESS portal layout + dashboard page.
+
+    Design rules enforced here:
+    •  border-2 border-black  → ess-card, ess-chip, ess-btn
+    •  Zero border-radius     → chips, buttons, avatar
+    •  hover:bg-black hover:text-white → handled via CSS .ess-chip:hover
+    •  Inter font             → .ess-portal global rule in CSS
+    •  Bento grid             → .ess-bento grid
+-->
+<odoo>
+    <!-- ── Portal navigation tile ──────────────────────────────────── -->
+    <template id="portal_my_home_ess" name="ESS Portal Home Tile"
+              inherit_id="portal.portal_my_home" priority="30">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="after">
+            <t t-if="user_id.has_group('base.group_portal')">
+                <div class="col-12 col-md-6">
+                    <div class="card bg-primary text-white" style="box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 10px; padding: 1.5rem;">
+                        <div class="card-body text-center">
+                            <h3 class="card-title" style="font-size: 1.5rem; font-weight: 600;">
+                                <i class="fa fa-fw fa-users" style="margin-right: 10px;"></i>Employee Portal
+                            </h3>
+                            <p class="card-text" style="font-size: 1rem; margin-bottom: 1.5rem;">
+                                Access your employee dashboard, leaves, and payslips.
+                            </p>
+                            <a href="/my/dashboard" class="btn btn-light" style="border-radius: 20px; padding: 0.5rem 1.5rem; font-weight: 600;">
+                                Go to Portal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- ── Shell layout (inherited by all ESS pages) ───────────────── -->
+    <!--
+        Uses web.layout (core) directly to avoid portal.frontend_layout's
+        dependency on website-dispatch context (language_selector_visible).
+        web.assets_frontend is loaded explicitly so our CSS/JS bundle is included.
+    -->
+    <template id="portal_ess_layout" name="ESS Layout">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <t t-call-assets="web.assets_frontend" t-js="false"/>
+            </t>
+            <div class="ess-portal ess-shell">
+                <!-- Sidebar -->
+                <aside class="ess-sidebar">
+                    <div class="ess-sidebar__logo">
+                        <t t-if="employee_company_logo">
+                            <img t-att-src="employee_company_logo" alt="Company Logo" class="ess-sidebar__logo-img"/>
+                        </t>
+                        <t t-else="">
+                            <span><t t-esc="employee_company_name"/></span>
+                        </t>
+                    </div>
+                    <nav class="ess-sidebar__nav">
+                        <a href="/my/dashboard"
+                           t-att-class="'active' if page_name == 'dashboard' else ''">
+                            ▣ Dashboard
+                        </a>
+                        <a href="/my/leaves"
+                           t-att-class="'active' if page_name == 'leaves' else ''">
+                            ◈ Leave
+                        </a>
+                        <a href="/my/attendance"
+                           t-att-class="'active' if page_name == 'attendance' else ''">
+                            ◉ Attendance
+                        </a>
+                        <a href="/my/attendance/request-correction"
+                           t-att-class="'active' if page_name == 'attendance_correction' else ''"
+                           style="font-size:.75rem;padding-left:1.5rem;color:#999;">
+                            ⟳ Correction Request
+                        </a>
+                        <a href="/my/payslips"
+                           t-att-class="'active' if page_name == 'payslips' else ''">
+                            ◎ Payslips
+                        </a>
+                        <a href="/my/expenses"
+                           t-att-class="'active' if page_name == 'expenses' else ''">
+                            ◆ Expenses
+                        </a>
+                        <a href="/my/timesheets"
+                           t-att-class="'active' if page_name == 'timesheets' else ''">
+                            ⏱ Timesheets
+                        </a>
+                        <a href="/ess/projects"
+                           t-att-class="'active' if page_name == 'projects' else ''">
+                            📌 Projects
+                        </a>
+                        <a href="/ess/tasks"
+                           t-att-class="'active' if page_name == 'tasks' else ''">
+                            ☑ Tasks
+                        </a>
+                        <a href="/my/calendar"
+                           t-att-class="'active' if page_name == 'calendar' else ''">
+                            ◷ Calendar
+                        </a>
+                        <hr style="border-color:#222;margin:1.5rem 0"/>
+                        <a href="/web/session/logout" style="color:#c44;">
+                            ⊠ Sign Out
+                        </a>
+                    </nav>
+                    <!-- Employee mini-card -->
+                    <div style="margin-top:auto;padding-top:2rem;border-top:1px solid #333;">
+                        <div style="font-size:.75rem;color:#aaa;margin-bottom:.25rem;">
+                            Signed in as
+                        </div>
+                        <div style="font-size:.85rem;font-weight:700;color:#fff;">
+                            <t t-esc="employee_name"/>
+                        </div>
+                        <div style="font-size:.72rem;color:#888;margin-top:2px;">
+                            <t t-esc="employee_job_title"/>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main -->
+                <main class="ess-main" role="main">
+                    <t t-out="0"/>
+                </main>
+            </div>
+            <t t-call-assets="web.assets_frontend" t-css="false"/>
+        </t>
+    </template>
+
+    <!-- ── Dashboard page ──────────────────────────────────────────── -->
+    <template id="portal_dashboard" name="ESS Dashboard">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <!-- Page header -->
+            <div class="ess-page-header">
+                <h1>Dashboard</h1>
+                <span class="ess-timestamp js-live-clock">--:--:--</span>
+            </div>
+
+            <!-- Quick-action chips with metadata -->
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem;">
+                <a href="/my/leaves/new" class="ess-chip" style="padding:0.6rem 1rem;font-size:0.8rem;border:1px solid #000;display:flex;align-items:center;gap:0.5rem;">
+                    ◈ Leave
+                    <t t-if="leave_pending > 0">
+                        <span style="background:#f39c12;color:white;padding:0.2rem 0.4rem;border-radius:2px;font-size:0.7rem;font-weight:600;">
+                            <t t-esc="leave_pending"/> pending
+                        </span>
+                    </t>
+                </a>
+                <a href="/my/timesheets/new" class="ess-chip" style="padding:0.6rem 1rem;font-size:0.8rem;border:1px solid #000;display:flex;align-items:center;gap:0.5rem;">
+                    ⏱ Log Hours
+                    <span style="color:#666;font-size:0.7rem;">
+                        <t t-esc="'%.1f' % timesheets_today"/>h today
+                    </span>
+                </a>
+                <a href="/my/attendance" class="ess-chip" style="padding:0.6rem 1rem;font-size:0.8rem;border:1px solid #000;display:flex;align-items:center;gap:0.5rem;">
+                    ◉ Attendance
+                    <t t-if="attendance_status == 'on-track'">
+                        <span style="background:#27ae60;color:white;padding:0.2rem 0.4rem;border-radius:2px;font-size:0.7rem;font-weight:600;">On Track</span>
+                    </t>
+                    <t t-elif="attendance_status == 'behind'">
+                        <span style="background:#f39c12;color:white;padding:0.2rem 0.4rem;border-radius:2px;font-size:0.7rem;font-weight:600;">Behind</span>
+                    </t>
+                    <t t-else="">
+                        <span style="background:#3498db;color:white;padding:0.2rem 0.4rem;border-radius:2px;font-size:0.7rem;font-weight:600;">OT</span>
+                    </t>
+                </a>
+                <a href="/my/expenses/new" class="ess-chip" style="padding:0.6rem 1rem;font-size:0.8rem;border:1px solid #000;display:flex;align-items:center;gap:0.5rem;">
+                    ◆ Expense
+                    <t t-if="pending_expenses > 0">
+                        <span style="background:#e74c3c;color:white;padding:0.2rem 0.4rem;border-radius:2px;font-size:0.7rem;font-weight:600;">
+                            <t t-esc="pending_expenses"/>
+                        </span>
+                    </t>
+                </a>
+                <a href="/ess/tasks" class="ess-chip" style="padding:0.6rem 1rem;font-size:0.8rem;border:1px solid #000;display:flex;align-items:center;gap:0.5rem;">
+                    ☑ Tasks
+                    <span style="background:#000;color:white;padding:0.2rem 0.4rem;border-radius:2px;font-size:0.7rem;font-weight:600;">
+                        <t t-esc="total_tasks"/>
+                    </span>
+                </a>
+                <a href="/ess/projects" class="ess-chip" style="padding:0.6rem 1rem;font-size:0.8rem;border:1px solid #000;display:flex;align-items:center;gap:0.5rem;">
+                    📌 Projects
+                    <span style="background:#000;color:white;padding:0.2rem 0.4rem;border-radius:2px;font-size:0.7rem;font-weight:600;">
+                        <t t-esc="total_active_projects"/>
+                    </span>
+                </a>
+                <t t-if="payslips">
+                    <a t-att-href="'/my/payslips/%d/pdf' % payslips[0].id" class="ess-chip" style="padding:0.6rem 1rem;font-size:0.8rem;border:1px solid #000;display:flex;align-items:center;gap:0.5rem;">
+                        ↓ Payslip
+                        <span style="color:#666;font-size:0.7rem;">
+                            <t t-esc="payslips[0].date_from.strftime('%b %y')"/>
+                        </span>
+                    </a>
+                </t>
+            </div>
+
+            <!-- Main content + sidebar grid -->
+            <div class="ess-dashboard-layout">
+                <!-- Main content area -->
+                <div class="ess-dashboard-main">
+
+                    <!-- Leave Status Section -->
+                    <div class="ess-section">
+                        <div class="ess-section__header">
+                            <h2>Leave Requests</h2>
+                            <a href="/my/leaves" style="font-size:.8rem;color:#666;">See All</a>
+                        </div>
+                        <div class="ess-bento ess-bento--compact">
+                            <div class="ess-card">
+                                <div class="ess-card__label">PENDING</div>
+                                <div class="ess-card__value" style="color:#f39c12;">
+                                    <t t-esc="leave_pending"/>
+                                </div>
+                                <div class="ess-card__sub">awaiting approval</div>
+                            </div>
+                            <div class="ess-card">
+                                <div class="ess-card__label">APPROVED</div>
+                                <div class="ess-card__value" style="color:#27ae60;">
+                                    <t t-esc="leave_approved"/>
+                                </div>
+                                <div class="ess-card__sub">upcoming</div>
+                            </div>
+                            <div class="ess-card">
+                                <div class="ess-card__label">REJECTED</div>
+                                <div class="ess-card__value" style="color:#e74c3c;">
+                                    <t t-esc="leave_rejected"/>
+                                </div>
+                                <div class="ess-card__sub">declined</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leave Balances Section -->
+                    <div class="ess-section">
+                        <div class="ess-section__header">
+                            <h2>Leave Balances</h2>
+                        </div>
+                        <t t-if="allocations">
+                            <div class="ess-bento ess-bento--compact">
+                                <t t-foreach="allocations[:2]" t-as="alloc">
+                                    <div class="ess-card">
+                                        <div class="ess-card__label">
+                                            <t t-esc="alloc.holiday_status_id.name"/>
+                                        </div>
+                                        <div class="ess-card__value">
+                                            <t t-esc="'%.1f' % (alloc.number_of_days_display or 0)"/>
+                                        </div>
+                                        <div class="ess-card__sub">
+                                            / <t t-esc="'%.1f' % (alloc.number_of_days or 0)"/> Days
+                                        </div>
+                                        <div class="ess-leave-bar" style="margin-top:.75rem;">
+                                            <div class="ess-leave-bar__fill"
+                                                 t-att-style="'width: ' + str(min(100, int((alloc.number_of_days_display or 0) / max(1, alloc.number_of_days) * 100))) + '%'"/>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                        <t t-else="else">
+                            <div class="ess-card">
+                                <p style="color:#999;margin:0;">No leave allocations</p>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Expense Overview Section -->
+                    <div class="ess-section">
+                        <div class="ess-section__header">
+                            <h2>Expense Overview</h2>
+                            <span style="font-size:.75rem;color:#999;">Track your reimbursements and claims</span>
+                        </div>
+                        <div class="ess-bento ess-bento--compact">
+                            <div class="ess-card">
+                                <div class="ess-card__label">PENDING EXPENSES</div>
+                                <div class="ess-card__value">
+                                    <t t-esc="pending_expenses"/>
+                                </div>
+                                <div class="ess-card__sub">awaiting approval</div>
+                                <div style="margin-top:.75rem;">
+                                    <a class="ess-btn" href="/my/expenses">
+                                        View →
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="ess-card">
+                                <div class="ess-card__label">PENDING REQUESTS</div>
+                                <div class="ess-card__value">
+                                    <t t-esc="pending_requests"/>
+                                </div>
+                                <div class="ess-card__sub">in progress</div>
+                                <div style="margin-top:.75rem;">
+                                    <a class="ess-btn" href="/my/expenses/new">
+                                        + New
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Analysis Section -->
+                    <div class="ess-section">
+                        <div class="ess-section__header">
+                            <h2>Attendance Analysis</h2>
+                            <span style="font-size:.75rem;color:#999;">Your time tracking summary</span>
+                        </div>
+                        <div class="ess-bento ess-bento--compact">
+                            <div class="ess-card">
+                                <div class="ess-card__label">TODAY</div>
+                                <div class="ess-card__value">
+                                    <t t-esc="'%dh %dm' % (int(today_hours), int((today_hours % 1) * 60))"/>
+                                </div>
+                                <div class="ess-card__sub">/ <t t-esc="target_hours_per_day"/> hrs target</div>
+                                <div style="margin-top:.75rem;">
+                                    <span t-att-style="'background: %s; color: white; padding: 0.35rem 0.65rem; font-size: 0.7rem; font-weight: 600; display: inline-block;' % ('#27ae60' if attendance_status == 'on-track' else '#f39c12' if attendance_status == 'behind' else '#3498db')">
+                                        <t t-if="attendance_status == 'on-track'">✓ ON TRACK</t>
+                                        <t t-elif="attendance_status == 'behind'">⊘ BEHIND</t>
+                                        <t t-else="">⬆ OVERTIME</t>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="ess-card">
+                                <div class="ess-card__label">THIS WEEK</div>
+                                <div class="ess-card__value">
+                                    <t t-esc="'%dh %dm' % (int(week_hours), int((week_hours % 1) * 60))"/>
+                                </div>
+                                <div class="ess-card__sub">total hours</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- My Tasks Section -->
+                    <t t-if="tasks">
+                        <div class="ess-section">
+                            <div class="ess-section__header">
+                                <h2>My Tasks</h2>
+                                <a href="/ess/tasks" style="font-size:.8rem;color:#666;">All Tasks (<t t-esc="total_tasks"/>)</a>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:.75rem;">
+                                <t t-foreach="tasks[:3]" t-as="task">
+                                    <div class="ess-card" style="padding:1rem;border:1px solid #ddd;">
+                                        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                            <div style="flex:1;">
+                                                <div style="font-weight:600;color:#2c3e50;margin-bottom:.5rem;">
+                                                    <t t-esc="task.name"/>
+                                                </div>
+                                                <div style="font-size:.8rem;color:#666;">
+                                                    <t t-esc="task.project_id.name"/>
+                                                </div>
+                                            </div>
+                                            <t t-if="task.priority">
+                                                <span t-att-style="'background: %s; color: white; padding: 0.25rem 0.5rem; font-size: 0.7rem; font-weight: 600;' % ('#e74c3c' if task.priority in ['3', '4'] else '#f39c12' if task.priority == '2' else '#27ae60')">
+                                                    <t t-if="task.priority in ['3', '4']">HIGH</t>
+                                                    <t t-elif="task.priority == '2'">MED</t>
+                                                    <t t-else="">LOW</t>
+                                                </span>
+                                            </t>
+                                        </div>
+                                        <t t-if="task.date_deadline">
+                                            <div style="margin-top:.5rem;font-size:.8rem;color:#666;">
+                                                Due: <t t-esc="task.date_deadline.strftime('%d %b')"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Upcoming Leaves Section -->
+                    <t t-if="upcoming_leaves">
+                        <div class="ess-section">
+                            <div class="ess-section__header">
+                                <h2>Upcoming Leaves</h2>
+                                <a href="/my/leaves" style="font-size:.8rem;color:#666;">View All</a>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:.75rem;">
+                                <t t-foreach="upcoming_leaves[:3]" t-as="leave">
+                                    <div class="ess-card" style="padding:1rem;border:1px solid #ddd;">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                                            <div>
+                                                <div style="font-weight:600;color:#2c3e50;margin-bottom:.25rem;">
+                                                    <t t-esc="leave.holiday_status_id.name"/>
+                                                </div>
+                                                <div style="font-size:.8rem;color:#666;">
+                                                    <t t-esc="leave.date_from.strftime('%d %b %Y')"/> → <t t-esc="leave.date_to.strftime('%d %b %Y')"/>
+                                                </div>
+                                            </div>
+                                            <span style="background:#27ae60;color:white;padding:0.25rem 0.5rem;font-size:0.7rem;font-weight:600;">
+                                                APPROVED
+                                            </span>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Projects Overview Section -->
+                    <t t-if="total_active_projects > 0">
+                        <div class="ess-section">
+                            <div class="ess-section__header">
+                                <h2>Projects Overview</h2>
+                                <a href="/ess/projects" style="font-size:.8rem;color:#666;">View All</a>
+                            </div>
+                            <div class="ess-bento ess-bento--compact">
+                                <div class="ess-card">
+                                    <div class="ess-card__label">ACTIVE PROJECTS</div>
+                                    <div class="ess-card__value">
+                                        <t t-esc="total_active_projects"/>
+                                    </div>
+                                    <div class="ess-card__sub">available for logging</div>
+                                </div>
+                                <div class="ess-card">
+                                    <div class="ess-card__label">MY TASKS</div>
+                                    <div class="ess-card__value">
+                                        <t t-esc="total_tasks"/>
+                                    </div>
+                                    <div class="ess-card__sub">in progress</div>
+                                    <div style="margin-top:.75rem;">
+                                        <a class="ess-btn" href="/ess/tasks">View →</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Timesheets Section -->
+                    <div class="ess-section">
+                        <div class="ess-section__header">
+                            <h2>Timesheets</h2>
+                            <a href="/my/timesheets" style="font-size:.8rem;color:#666;">View All</a>
+                        </div>
+                        <div class="ess-bento ess-bento--compact">
+                            <div class="ess-card">
+                                <div class="ess-card__label">TODAY</div>
+                                <div class="ess-card__value">
+                                    <t t-esc="'%dh %dm' % (int(timesheets_today), int((timesheets_today % 1) * 60))"/>
+                                </div>
+                                <div class="ess-card__sub">logged</div>
+                            </div>
+                            <div class="ess-card">
+                                <div class="ess-card__label">THIS WEEK</div>
+                                <div class="ess-card__value">
+                                    <t t-esc="'%dh %dm' % (int(timesheets_week), int((timesheets_week % 1) * 60))"/>
+                                </div>
+                                <div class="ess-card__sub">total logged</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /ess-dashboard-main -->
+
+                <!-- Sidebar -->
+                <aside class="ess-dashboard-sidebar">
+                    <!-- Company logo card -->
+                    <t t-if="employee_company_logo">
+                        <div class="ess-card" style="display:flex;align-items:center;justify-content:center;padding:1.5rem;">
+                            <img t-att-src="employee_company_logo" alt="Company Logo" style="max-width:100%;max-height:100px;object-fit:contain;"/>
+                        </div>
+                    </t>
+
+                    <!-- Profile card -->
+                    <a href="/my/account" class="ess-card ess-card--profile">
+                        <div class="ess-avatar">
+                            <t t-esc="employee_initials"/>
+                        </div>
+                        <div>
+                            <div class="ess-employee-name">
+                                <t t-esc="employee_name"/>
+                            </div>
+                            <div class="ess-employee-role">
+                                <t t-esc="employee_job_title or '—'"/>
+                            </div>
+                            <t t-if="employee_department_name">
+                                <div class="ess-employee-dept">
+                                    <t t-esc="employee_department_name"/>
+                                </div>
+                            </t>
+                            <div class="ess-employee-email">
+                                <t t-esc="employee_work_email"/>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Check-in / Check-out card -->
+                    <div class="ess-card js-attendance-clock"
+                         t-att-data-checked-in="1 if employee_is_checked_in else 0">
+                        <div class="ess-card__label">Attendance</div>
+                        <div class="ess-clock-widget">
+                            <div>
+                                <span class="ess-clock-dot js-clock-dot"/>
+                                <span class="js-clock-status"/>
+                            </div>
+                            <div style="font-size:.8rem;color:#555;">
+                                Today: <strong class="js-today-hours">
+                                    <t t-esc="'%.2f' % today_hours"/>
+                                </strong> hrs
+                            </div>
+                            <button class="ess-btn ess-btn--primary js-clock-btn" type="button">
+                                Check In
+                            </button>
+                            <span class="js-clock-error"
+                                  style="display:none;font-size:.78rem;color:#c00;"/>
+                        </div>
+                    </div>
+
+                    <!-- Latest payslip -->
+                    <t t-if="payslips">
+                        <div class="ess-card">
+                            <div class="ess-card__label">Latest Payslip</div>
+                            <div class="ess-card__value" style="font-size:1.4rem;">
+                                <t t-esc="payslips[0].name"/>
+                            </div>
+                            <div class="ess-card__sub">
+                                <t t-esc="payslips[0].date_from"/> →
+                                <t t-esc="payslips[0].date_to"/>
+                            </div>
+                            <div style="margin-top:.75rem;">
+                                <a class="ess-btn"
+                                   t-att-href="'/my/payslips/%d/pdf' % payslips[0].id">
+                                    ↓ PDF
+                                </a>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Pending leave count -->
+                    <div class="ess-card">
+                        <div class="ess-card__label">Pending Leaves</div>
+                        <div class="ess-card__value">
+                            <t t-esc="employee_pending_leave_count"/>
+                        </div>
+                        <div class="ess-card__sub">awaiting approval</div>
+                        <div style="margin-top:.75rem;">
+                            <a class="ess-btn" href="/my/leaves?state_filter=confirm">
+                                View →
+                            </a>
+                        </div>
+                    </div>
+
+                </aside><!-- /ess-dashboard-sidebar -->
+
+            </div><!-- /ess-dashboard-layout -->
+
+        </t>
+    </template>
+</odoo>

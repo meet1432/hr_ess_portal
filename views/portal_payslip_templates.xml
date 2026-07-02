@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ── Payslip list ──────────────────────────────────────────────── -->
+    <template id="portal_payslips" name="ESS Payslips">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <div class="ess-page-header">
+                <h1>Payslips</h1>
+                <!-- Month filter -->
+                <form method="get" style="display:flex;gap:.5rem;align-items:center;">
+                    <select class="ess-input" name="month_filter" style="width:auto;">
+                        <option value="">All Months</option>
+                        <t t-foreach="available_months" t-as="month">
+                            <option t-att-value="month" t-att-selected="month == month_filter">
+                                <t t-esc="month"/>
+                            </option>
+                        </t>
+                    </select>
+                    <button class="ess-btn" type="submit">Filter</button>
+                    <t t-if="month_filter">
+                        <a class="ess-btn" href="/my/payslips">Clear</a>
+                    </t>
+                </form>
+            </div>
+
+            <div class="ess-card" style="box-shadow:none;padding:0;">
+                <table class="ess-table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Period</th>
+                            <th>State</th>
+                            <th>PDF</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-if="not payslips">
+                            <tr>
+                                <td colspan="4" style="text-align:center;color:#888;padding:2rem;">
+                                    No payslips available.
+                                </td>
+                            </tr>
+                        </t>
+                        <t t-foreach="payslips" t-as="slip">
+                            <tr>
+                                <td><strong><t t-esc="slip.name"/></strong></td>
+                                <td>
+                                    <t t-esc="slip.date_from and slip.date_from.strftime('%Y-%m-%d') or ''"/> →
+                                    <t t-esc="slip.date_to and slip.date_to.strftime('%Y-%m-%d') or ''"/>
+                                </td>
+                                <td>
+                                    <span t-att-class="'ess-badge ess-badge--validate' if slip.state == 'paid' else 'ess-badge ess-badge--confirm'">
+                                        <t t-esc="slip.state"/>
+                                    </span>
+                                </td>
+                                <td>
+                                    <a class="ess-btn"
+                                       style="padding:.3rem .75rem;font-size:.72rem;"
+                                       t-att-href="'/my/payslips/%d/pdf' % slip.id">
+                                        ↓ Download
+                                    </a>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+
+            <t t-if="pager and pager.get('page_count', 1) > 1">
+                <div style="margin-top:1.5rem;">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

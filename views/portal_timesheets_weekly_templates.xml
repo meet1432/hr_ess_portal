@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ── Weekly Timesheet View ───────────────────────────────────── -->
+    <template id="portal_timesheets_weekly" name="ESS Weekly Timesheet">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <style>
+                .week-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1.5rem;
+                }
+                .week-nav {
+                    display: flex;
+                    gap: 0.75rem;
+                }
+                .day-column {
+                    flex: 1;
+                    min-width: 120px;
+                    border: 2px solid #222;
+                    border-radius: 4px;
+                    padding: 1rem;
+                    background: #fff;
+                }
+                .day-column.weekend {
+                    background: #f5f5f5;
+                }
+                .day-column.today {
+                    border-color: #27ae60;
+                    background: #f0fdf4;
+                }
+                .day-header {
+                    font-weight: 700;
+                    font-size: 0.9rem;
+                    color: #222;
+                    margin-bottom: 0.5rem;
+                }
+                .day-date {
+                    font-size: 0.75rem;
+                    color: #888;
+                }
+                .day-entries {
+                    margin: 1rem 0;
+                    padding: 0.75rem;
+                    background: #f9f9f9;
+                    border-radius: 4px;
+                    min-height: 60px;
+                    max-height: 150px;
+                    overflow-y: auto;
+                    font-size: 0.75rem;
+                }
+                .entry-item {
+                    padding: 0.5rem;
+                    background: #e8f4f8;
+                    border-left: 3px solid #3498db;
+                    margin-bottom: 0.5rem;
+                    border-radius: 2px;
+                    position: relative;
+                    padding-right: 2.5rem;
+                }
+                .entry-item:hover {
+                    background: #d4eaf0;
+                }
+                .entry-item.submitted {
+                    border-left-color: #27ae60;
+                    background: #d5f4e6;
+                    opacity: 0.8;
+                }
+                .entry-actions {
+                    display: flex;
+                    gap: 0.25rem;
+                    position: absolute;
+                    top: 0.25rem;
+                    right: 0.25rem;
+                }
+                .entry-btn {
+                    padding: 0.15rem 0.3rem;
+                    font-size: 0.6rem;
+                    border: none;
+                    border-radius: 2px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    width: 1.2rem;
+                    height: 1.2rem;
+                    padding: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .entry-btn-edit {
+                    background: #3498db;
+                    color: white;
+                }
+                .entry-btn-edit:hover {
+                    background: #2980b9;
+                }
+                .entry-btn-delete {
+                    background: #e74c3c;
+                    color: white;
+                }
+                .entry-btn-delete:hover {
+                    background: #c0392b;
+                }
+                .entry-project {
+                    font-weight: 600;
+                    color: #2c3e50;
+                }
+                .entry-hours {
+                    color: #27ae60;
+                    font-weight: 700;
+                    margin-top: 0.25rem;
+                }
+                .day-total {
+                    text-align: center;
+                    padding: 0.5rem;
+                    background: #2c3e50;
+                    color: white;
+                    border-radius: 4px;
+                    font-weight: 700;
+                    font-size: 1rem;
+                    margin: 0.75rem 0;
+                }
+                .day-total.full {
+                    background: #27ae60;
+                }
+                .day-total.over {
+                    background: #f39c12;
+                }
+                .quick-entry {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                    font-size: 0.75rem;
+                }
+                .quick-entry input,
+                .quick-entry select {
+                    padding: 0.25rem;
+                    border: 1px solid #ddd;
+                    border-radius: 3px;
+                    font-size: 0.75rem;
+                }
+                .quick-entry button {
+                    padding: 0.4rem;
+                    background: #3498db;
+                    color: white;
+                    border: none;
+                    border-radius: 3px;
+                    cursor: pointer;
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                }
+                .quick-entry button:hover {
+                    background: #2980b9;
+                }
+                .week-summary {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    background: #2c3e50;
+                    color: white;
+                    padding: 1.5rem;
+                    border-radius: 4px;
+                    margin: 1.5rem 0;
+                }
+                .weekly-total {
+                    font-size: 2rem;
+                    font-weight: 700;
+                }
+                .weekly-label {
+                    font-size: 0.9rem;
+                    opacity: 0.9;
+                }
+                /* Edit Modal */
+                .edit-modal {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 1000;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .edit-modal.active {
+                    display: flex;
+                }
+                .edit-modal-content {
+                    background: white;
+                    padding: 2rem;
+                    border-radius: 8px;
+                    max-width: 400px;
+                    width: 90%;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                }
+                .edit-modal-content h3 {
+                    margin-top: 0;
+                    margin-bottom: 1.5rem;
+                }
+                .edit-form-group {
+                    margin-bottom: 1rem;
+                }
+                .edit-form-group label {
+                    display: block;
+                    font-weight: 600;
+                    margin-bottom: 0.5rem;
+                    font-size: 0.9rem;
+                }
+                .edit-form-group input {
+                    width: 100%;
+                    padding: 0.5rem;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    box-sizing: border-box;
+                }
+                .edit-modal-buttons {
+                    display: flex;
+                    gap: 0.75rem;
+                    justify-content: flex-end;
+                    margin-top: 1.5rem;
+                }
+                .edit-modal-buttons button {
+                    padding: 0.5rem 1rem;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-weight: 600;
+                }
+                .btn-cancel {
+                    background: #95a5a6;
+                    color: white;
+                }
+                .btn-cancel:hover {
+                    background: #7f8c8d;
+                }
+                .btn-save {
+                    background: #27ae60;
+                    color: white;
+                }
+                .btn-save:hover {
+                    background: #229954;
+                }
+            </style>
+
+            <div class="ess-page-header">
+                <h1>Weekly Timesheets</h1>
+                <div class="week-nav">
+                    <a class="ess-btn" t-att-href="'/my/timesheets/weekly?year=%d&amp;week=%d' % (prev_year, prev_week)">‹ Prev</a>
+                    <a class="ess-btn ess-btn--primary" href="/my/timesheets/weekly">This Week</a>
+                    <a class="ess-btn" t-att-href="'/my/timesheets/weekly?year=%d&amp;week=%d' % (next_year, next_week)">Next ›</a>
+                </div>
+            </div>
+
+            <t t-if="error">
+                <div class="ess-card" style="margin-bottom:1rem;border-color:#b00020;color:#b00020;">
+                    <t t-esc="error"/>
+                </div>
+            </t>
+
+            <!-- Week info -->
+            <div style="margin-bottom:1.5rem;text-align:center;color:#666;font-size:0.9rem;">
+                Week <strong><t t-esc="week"/></strong> ·
+                <t t-esc="week_start.strftime('%b %d')"/> — <t t-esc="week_end.strftime('%b %d, %Y')"/>
+            </div>
+
+            <!-- Projects/Tasks selector (enhanced) -->
+            <div class="ess-card" style="margin-bottom:1.5rem;padding:1rem;border:2px solid #000;">
+                <div style="margin-bottom:1rem;">
+                    <label style="font-weight:700;font-size:0.9rem;margin-bottom:0.5rem;display:block;">
+                        Select Project &amp; Task for Quick Entry
+                    </label>
+
+                    <!-- Search Box -->
+                    <input type="text" id="projectSearch" placeholder="🔍 Search projects..." style="width:100%;padding:0.6rem;border:1px solid #ccc;margin-bottom:0.75rem;font-size:0.85rem;"/>
+
+                    <!-- Recent Projects (if any) -->
+                    <t t-if="recent_projects">
+                        <div style="margin-bottom:1rem;">
+                            <div style="font-size:0.7rem;font-weight:600;color:#666;margin-bottom:0.5rem;text-transform:uppercase;">
+                                ⭐ Recent
+                            </div>
+                            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                                <t t-foreach="recent_projects[:4]" t-as="proj">
+                                    <button type="button"
+                                            onclick="selectProject(this, {}, {})"
+                                            t-att-data-project-id="proj.id"
+                                            t-att-data-project-name="proj.name"
+                                            style="padding:0.5rem 0.75rem;border:1px solid #000;background:#f5f5f5;cursor:pointer;font-size:0.8rem;border-radius:2px;transition:all 0.2s;"
+                                            onmouseover="this.style.background='#000'; this.style.color='#fff';"
+                                            onmouseout="this.style.background='#f5f5f5'; this.style.color='#000';">
+                                        📌 <t t-esc="proj.name[:20]"/>
+                                    </button>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+                    <div>
+                        <label style="font-weight:700;font-size:0.85rem;margin-bottom:0.5rem;display:block;">
+                            Project *
+                        </label>
+                        <select id="defaultProject" class="ess-select" onchange="onProjectChange()"
+                                style="border:1px solid #ccc;padding:0.6rem;font-size:0.85rem;">
+                            <option value="">— Select Project —</option>
+                            <t t-foreach="projects" t-as="proj">
+                                <option t-att-value="proj.id" t-att-data-task-count="len(proj.task_ids)">
+                                    <t t-esc="proj.name"/> (<t t-esc="len(proj.task_ids)"/> tasks)
+                                </option>
+                            </t>
+                        </select>
+                        <div style="font-size:0.7rem;color:#999;margin-top:0.3rem;">
+                            <span id="projectInfo">— Select a project to see tasks —</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-weight:700;font-size:0.85rem;margin-bottom:0.5rem;display:block;">
+                            Task (optional)
+                        </label>
+                        <select id="defaultTask" class="ess-select" disabled="disabled"
+                                style="border:1px solid #ccc;padding:0.6rem;font-size:0.85rem;opacity:0.6;">
+                            <option value="">— Select Task —</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="font-size:0.75rem;color:#666;">
+                    💡 Tip: Start typing in the search box above to quickly find projects
+                </div>
+            </div>
+
+            <!-- Weekly timesheet table -->
+            <div style="overflow-x:auto;margin-bottom:1.5rem;">
+                <table style="width:100%;border-collapse:collapse;border:2px solid #000;background:white;">
+                    <!-- Header Row -->
+                    <thead>
+                        <tr style="background:#2c3e50;color:white;">
+                            <th style="border:1px solid #ddd;padding:0.75rem;text-align:left;font-weight:700;min-width:200px;">
+                                PROJECT / TASK
+                            </th>
+                            <t t-foreach="day_data" t-as="day">
+                                <th t-att-style="'border:1px solid #ddd;padding:0.75rem;text-align:center;font-weight:700;background:%s;' % ('#d4edda' if day['is_today'] else '#2c3e50')"
+                                    t-att-class="'today' if day['is_today'] else ''">
+                                    <div style="font-size:0.85rem;"><t t-esc="day['day_name'][:3].upper()"/></div>
+                                    <div style="font-size:0.75rem;color:#aaa;" t-att-style="'color:#000;' if day['is_today'] else ''">
+                                        <t t-esc="day['date'].strftime('%d/%m')"/>
+                                    </div>
+                                </th>
+                            </t>
+                            <th style="border:1px solid #ddd;padding:0.75rem;text-align:center;font-weight:700;background:#34495e;color:white;min-width:80px;">
+                                TOTAL
+                            </th>
+                        </tr>
+                    </thead>
+                    <!-- Data Rows -->
+                    <tbody>
+                        <t t-if="not projects">
+                            <tr>
+                                <td colspan="8" style="border:1px solid #ddd;padding:2rem;text-align:center;color:#999;">
+                                    No projects available. Create a project first.
+                                </td>
+                            </tr>
+                        </t>
+                        <t t-foreach="projects" t-as="proj">
+                            <!-- Project Row -->
+                            <tr style="background:#f9f9f9;border-top:2px solid #000;">
+                                <td style="border:1px solid #ddd;padding:0.75rem;font-weight:700;color:#2c3e50;">
+                                    📌 <t t-esc="proj.name"/>
+                                </td>
+                                <t t-foreach="day_data" t-as="day">
+                                    <td t-att-style="'border:1px solid #ddd;padding:0.75rem;text-align:center;background:%s;' % ('#e8f5e9' if day['is_today'] else '#fff')"
+                                        style="cursor:pointer;transition:background 0.2s;"
+                                        t-att-onclick="'openQuickEntry(&quot;%d&quot;, &quot;%s&quot;)' % (proj.id, day['date'].strftime('%Y-%m-%d'))">
+                                        <t t-set="proj_hours" t-value="sum(e.unit_amount for e in day['entries'] if e.project_id.id == proj.id and not e.task_id)"/>
+                                        <span style="font-weight:600;color:#333;font-size:0.9rem;">
+                                            <t t-if="proj_hours > 0">
+                                                <t t-esc="'%.2f' % proj_hours"/>
+                                            </t>
+                                            <t t-else="">—</t>
+                                        </span>
+                                    </td>
+                                </t>
+                                <td style="border:1px solid #ddd;padding:0.75rem;text-align:center;background:#f0f0f0;font-weight:700;">
+                                    <t t-set="proj_total" t-value="sum(e.unit_amount for e in timesheets if e.project_id.id == proj.id and not e.task_id)"/>
+                                    <t t-if="proj_total > 0">
+                                        <t t-esc="'%.2f' % proj_total"/>
+                                    </t>
+                                    <t t-else="">—</t>
+                                </td>
+                            </tr>
+                            <!-- Task Rows (if any) -->
+                            <t t-foreach="proj.task_ids" t-as="task">
+                                <tr style="background:#fff;">
+                                    <td style="border:1px solid #ddd;padding:0.75rem;padding-left:2rem;color:#666;font-size:0.85rem;">
+                                        ☑ <t t-esc="task.name"/>
+                                    </td>
+                                    <t t-foreach="day_data" t-as="day">
+                                        <td t-att-style="'border:1px solid #ddd;padding:0.75rem;text-align:center;background:%s;cursor:pointer;transition:background 0.2s;' % ('#e8f5e9' if day['is_today'] else '#fff')"
+                                            t-att-onclick="'openQuickEntry(&quot;%d&quot;, &quot;%s&quot;, &quot;%d&quot;)' % (proj.id, day['date'].strftime('%Y-%m-%d'), task.id)">
+                                            <t t-set="task_hours" t-value="sum(e.unit_amount for e in day['entries'] if e.project_id.id == proj.id and e.task_id.id == task.id)"/>
+                                            <span style="font-size:0.85rem;">
+                                                <t t-if="task_hours > 0">
+                                                    <t t-esc="'%.2f' % task_hours"/>
+                                                </t>
+                                                <t t-else="">—</t>
+                                            </span>
+                                        </td>
+                                    </t>
+                                    <td style="border:1px solid #ddd;padding:0.75rem;text-align:center;background:#f0f0f0;">
+                                        <t t-set="task_total" t-value="sum(e.unit_amount for e in timesheets if e.project_id.id == proj.id and e.task_id.id == task.id)"/>
+                                        <t t-if="task_total > 0">
+                                            <t t-esc="'%.2f' % task_total"/>
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </t>
+                        <!-- TOTAL Row -->
+                        <tr style="background:#2c3e50;color:white;font-weight:700;border-top:2px solid #000;">
+                            <td style="border:1px solid #ddd;padding:0.75rem;">TOTAL</td>
+                            <t t-foreach="day_data" t-as="day">
+                                <td style="border:1px solid #ddd;padding:0.75rem;text-align:center;font-size:1rem;">
+                                    <t t-esc="'%.2f' % day['total_hours']"/>
+                                </td>
+                            </t>
+                            <td style="border:1px solid #ddd;padding:0.75rem;text-align:center;font-size:1.1rem;">
+                                <t t-esc="'%.2f' % weekly_total"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Weekly summary -->
+            <div class="week-summary">
+                <div>
+                    <div class="weekly-label">Weekly Total Hours</div>
+                    <div class="weekly-total">
+                        <t t-esc="'%.1f' % weekly_total"/>h / 40h
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <t t-if="weekly_total &lt; 35">
+                        <div class="weekly-label" style="color:#f39c12;">
+                            ⚠ <t t-esc="'%.1f' % (40 - weekly_total)"/>h remaining
+                        </div>
+                    </t>
+                    <t t-elif="weekly_total == 40">
+                        <div class="weekly-label" style="color:#27ae60;">
+                            ✓ Full week completed
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="weekly-label" style="color:#f39c12;">
+                            ⚠ <t t-esc="'%.1f' % (weekly_total - 40)"/>h overtime
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- Submit entire week -->
+            <div style="display:flex;gap:1rem;justify-content:center;">
+                <a class="ess-btn" href="/my/timesheets">View All Timesheets</a>
+                <button class="ess-btn ess-btn--primary" onclick="submitWeek()">
+                    Submit Week for Approval
+                </button>
+            </div>
+
+            <!-- Edit Modal -->
+            <div id="editModal" class="edit-modal">
+                <div class="edit-modal-content">
+                    <h3>Edit Timesheet Entry</h3>
+                    <div class="edit-form-group">
+                        <label>Hours *</label>
+                        <input type="number" id="editHours" min="0.25" max="24" step="0.25" required="required"/>
+                    </div>
+                    <div class="edit-form-group">
+                        <label>Description</label>
+                        <input type="text" id="editDescription" placeholder="Description (optional)"/>
+                    </div>
+                    <div class="edit-modal-buttons">
+                        <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+                        <button class="btn-save" onclick="saveEdit()">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+
+        </t>
+    </template>
+</odoo>

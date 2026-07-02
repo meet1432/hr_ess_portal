@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_employee_portal,hr.employee portal read,hr.model_hr_employee,base.group_portal,1,0,0,0
+access_hr_leave_portal,hr.leave portal rw,hr_holidays.model_hr_leave,base.group_portal,1,1,1,0
+access_hr_leave_alloc_portal,hr.leave.allocation portal read,hr_holidays.model_hr_leave_allocation,base.group_portal,1,0,0,0
+access_hr_leave_type_portal,hr.leave.type portal read,hr_holidays.model_hr_leave_type,base.group_portal,1,0,0,0
+access_hr_attendance_portal,hr.attendance portal rc,hr_attendance.model_hr_attendance,base.group_portal,1,0,1,0
+access_hr_attendance_correction_portal,hr.attendance.correction portal,hr_ess_portal.model_hr_attendance_correction,base.group_portal,1,0,1,0
+access_hr_payslip_portal,hr.payslip portal read,hr_payroll.model_hr_payslip,base.group_portal,1,0,0,0
+access_hr_payslip_line_portal,hr.payslip.line portal read,hr_payroll.model_hr_payslip_line,base.group_portal,1,0,0,0
+access_hr_expense_portal,hr.expense portal rwc,hr_expense.model_hr_expense,base.group_portal,1,1,1,0
+access_mail_activity_portal,mail.activity portal read,mail.model_mail_activity,base.group_portal,1,0,0,0

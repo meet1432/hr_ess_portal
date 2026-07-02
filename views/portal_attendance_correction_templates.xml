@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_attendance_correction" name="ESS Attendance Correction">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+
+            <!-- Page header -->
+            <div class="ess-page-header">
+                <h1>Request Attendance Correction</h1>
+                <a class="ess-btn" href="/my/attendance">← Back</a>
+            </div>
+
+            <!-- Error message -->
+            <t t-if="error">
+                <div class="ess-card" style="margin-bottom:1rem;border-color:#b00020;color:#b00020;">
+                    <t t-esc="error"/>
+                </div>
+            </t>
+
+            <!-- Two-column layout: form + history -->
+            <div style="display:grid;grid-template-columns:1fr 350px;gap:2rem;margin-bottom:2rem;">
+
+                <!-- Correction request form -->
+                <div class="ess-card" style="max-width:600px;">
+                    <div style="margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #6b4c7a;">
+                        <h2 style="margin:0;font-size:1rem;font-weight:900;text-transform:uppercase;">
+                            Request a Correction
+                        </h2>
+                    </div>
+
+                    <form action="/my/attendance/request-correction" method="post" style="display:flex;flex-direction:column;gap:1.25rem;">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                        <!-- Date -->
+                        <div class="ess-form-group">
+                            <label class="ess-label" for="attendance_date">Date *</label>
+                            <input class="ess-input" type="date" name="attendance_date" id="attendance_date" required="required"/>
+                            <div style="font-size:.75rem;color:#555;margin-top:.3rem;">
+                                Which day did you miss check-in or check-out?
+                            </div>
+                        </div>
+
+                        <!-- Correction type -->
+                        <div class="ess-form-group">
+                            <label class="ess-label" for="correction_type">Correction Type *</label>
+                            <select class="ess-select" name="correction_type" id="correction_type" required="required"
+                                    onchange="updateTimeFields()">
+                                <option value="">— Select —</option>
+                                <option value="check_in">Missing Check-in Only</option>
+                                <option value="check_out">Missing Check-out Only</option>
+                                <option value="both">Missing Both (Full Day)</option>
+                            </select>
+                        </div>
+
+                        <!-- Check-in time -->
+                        <div class="ess-form-group" id="check_in_group" style="display:none;">
+                            <label class="ess-label" for="check_in_time">Check-in Time *</label>
+                            <input class="ess-input" type="time" name="check_in_time" id="check_in_time"/>
+                            <div style="font-size:.75rem;color:#555;margin-top:.3rem;">
+                                What time did you arrive? (HH:MM)
+                            </div>
+                        </div>
+
+                        <!-- Check-out time -->
+                        <div class="ess-form-group" id="check_out_group" style="display:none;">
+                            <label class="ess-label" for="check_out_time">Check-out Time *</label>
+                            <input class="ess-input" type="time" name="check_out_time" id="check_out_time"/>
+                            <div style="font-size:.75rem;color:#555;margin-top:.3rem;">
+                                What time did you leave? (HH:MM)
+                            </div>
+                        </div>
+
+                        <!-- Reason -->
+                        <div class="ess-form-group">
+                            <label class="ess-label" for="reason">Reason for Correction *</label>
+                            <textarea class="ess-textarea" name="reason" id="reason" rows="4"
+                                      placeholder="E.g., 'System issue prevented check-in', 'Forgot to clock in due to emergency meeting'..."
+                                      required="required"/>
+                            <div style="font-size:.75rem;color:#555;margin-top:.3rem;">
+                                HR will review and approve/reject your request.
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div style="display:flex;gap:.75rem;align-items:center;">
+                            <button class="ess-btn ess-btn--primary" type="submit">
+                                Submit Request
+                            </button>
+                            <a class="ess-btn" href="/my/attendance">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Recent corrections sidebar -->
+                <aside>
+                    <div class="ess-card">
+                        <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:2px solid #6b4c7a;">
+                            <h3 style="margin:0;font-size:.9rem;font-weight:900;text-transform:uppercase;">
+                                Recent Requests
+                            </h3>
+                        </div>
+
+                        <t t-if="not corrections">
+                            <div style="color:#999;font-size:.85rem;">
+                                No corrections yet.
+                            </div>
+                        </t>
+
+                        <t t-foreach="corrections" t-as="corr">
+                            <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #e0e0e0;">
+                                <div style="font-size:.75rem;color:#666;margin-bottom:.25rem;">
+                                    <t t-esc="corr.attendance_date"/>
+                                </div>
+                                <div style="font-size:.85rem;font-weight:600;margin-bottom:.35rem;">
+                                    <t t-esc="dict([('check_in', 'Check-in'), ('check_out', 'Check-out'), ('both', 'Both')]).get(corr.correction_type, '')"/>
+                                </div>
+                                <span t-att-class="'ess-badge ess-badge--' + corr.state">
+                                    <t t-esc="corr.state"/>
+                                </span>
+                                <t t-if="corr.rejection_reason">
+                                    <div style="font-size:.7rem;color:#b00020;margin-top:.5rem;">
+                                        Reason: <t t-esc="corr.rejection_reason"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </aside>
+
+            </div>
+
+            <script>
+                function updateTimeFields() {
+                    const type = document.getElementById('correction_type').value;
+                    document.getElementById('check_in_group').style.display =
+                        (type === 'check_in' || type === 'both') ? 'flex' : 'none';
+                    document.getElementById('check_out_group').style.display =
+                        (type === 'check_out' || type === 'both') ? 'flex' : 'none';
+
+                    // Update required attribute
+                    if (type === 'check_in' || type === 'both') {
+                        document.getElementById('check_in_time').required = true;
+                    } else {
+                        document.getElementById('check_in_time').required = false;
+                    }
+                    if (type === 'check_out' || type === 'both') {
+                        document.getElementById('check_out_time').required = true;
+                    } else {
+                        document.getElementById('check_out_time').required = false;
+                    }
+                }
+            </script>
+
+        </t>
+    </template>
+</odoo>

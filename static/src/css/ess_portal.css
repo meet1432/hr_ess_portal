@@ -1,0 +1,797 @@
+/* ============================================================
+   ess_portal.css
+   Odoo 19 Theme Color Palette
+   Font: system stack (no external dependency)
+   Palette: Odoo Professional
+   - Primary: #6b4c7a (Purple)
+   - Secondary: #8b7297 (Purple Light)
+   - Background: #f5f5f5
+   - Text: #354224 (Dark)
+   ============================================================ */
+
+/* ── Reset & base ─────────────────────────────────────────── */
+.ess-portal,
+.ess-portal * {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    box-sizing: border-box;
+}
+
+/* ── Layout shell ─────────────────────────────────────────── */
+.ess-shell {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 100vh;
+    background: #f5f5f5;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────── */
+.ess-sidebar {
+    background: #5a3e68; /* Darker purple */
+    color: #fff;
+    padding: 2rem 1.25rem;
+    border-right: 2px solid #4a3256; /* Even darker purple */
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.ess-sidebar__logo {
+    font-size: 1.1rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #8b7297; /* Lighter purple */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+}
+
+.ess-sidebar__logo-img {
+    max-width: 100%;
+    max-height: 80px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.ess-sidebar__nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.75rem;
+    color: #d0d0d0;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+    transition: all 0.12s ease;
+    margin-bottom: 2px;
+}
+
+.ess-sidebar__nav a:hover,
+.ess-sidebar__nav a.active {
+    color: #fff;
+    background: #6b4c7a; /* Primary purple */
+    border-color: #8b7297; /* Lighter purple */
+}
+
+.ess-sidebar__nav a.active {
+    border-left: 2px solid #fff;
+}
+
+/* ── Main content ─────────────────────────────────────────── */
+.ess-main {
+    padding: 2rem 2.5rem;
+    max-width: 1400px;
+}
+
+/* Dashboard layout with sidebar */
+.ess-dashboard-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+}
+
+.ess-dashboard-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.ess-dashboard-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: sticky;
+    top: 2rem;
+    height: fit-content;
+}
+
+/* Section headers */
+.ess-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ess-section__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #6b4c7a;
+}
+
+.ess-section__header h2 {
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 0;
+    color: #354224; /* Dark text */
+}
+
+/* Compact bento for sections */
+.ess-bento--compact {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: auto;
+}
+
+/* Task item styling */
+.ess-task-item {
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid #6b4c7a;
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ess-task-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex: 1;
+    color: #354224; /* Dark text */
+}
+
+.ess-task-date {
+    font-size: 0.75rem;
+    color: #999;
+    white-space: nowrap;
+}
+
+.ess-employee-dept {
+    font-size: 0.72rem;
+    color: #666;
+    margin-top: 2px;
+}
+
+.ess-employee-email {
+    font-size: 0.72rem;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* ── Page header ──────────────────────────────────────────── */
+.ess-page-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #6b4c7a;
+}
+
+.ess-page-header h1 {
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    margin: 0;
+    color: #354224; /* Dark text */
+}
+
+.ess-page-header .ess-timestamp {
+    font-size: 0.78rem;
+    color: #666;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Bento Grid ───────────────────────────────────────────── */
+.ess-bento {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: minmax(160px, auto);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Span helpers */
+.ess-bento--wide   { grid-column: span 2; }
+.ess-bento--tall   { grid-row:    span 2; }
+.ess-bento--full   { grid-column: span 3; }
+
+/* ── Cards ────────────────────────────────────────────────── */
+.ess-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 1.25rem;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(107, 76, 122, 0.1);
+    transition: box-shadow 0.12s ease, transform 0.12s ease, border-color 0.12s ease;
+}
+
+.ess-card:hover {
+    box-shadow: 0 4px 12px rgba(107, 76, 122, 0.15);
+    border-color: #6b4c7a;
+    transform: translateY(-2px);
+}
+
+.ess-card__label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6b4c7a;
+    margin-bottom: 0.4rem;
+}
+
+.ess-card__value {
+    font-size: 2.4rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    color: #354224; /* Dark text */
+}
+
+.ess-card__sub {
+    font-size: 0.78rem;
+    color: #555;
+    margin-top: 0.35rem;
+}
+
+/* Profile card variant */
+.ess-card--profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ess-avatar {
+    width: 56px;
+    height: 56px;
+    background: #6b4c7a;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 900;
+    flex-shrink: 0;
+    border-radius: 4px;
+}
+
+.ess-card--profile .ess-employee-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #354224; /* Dark text */
+}
+
+.ess-card--profile .ess-employee-role {
+    font-size: 0.78rem;
+    color: #555;
+    margin-top: 2px;
+}
+
+/* ── Quick-action chips ──────────────────────────────────── */
+.ess-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+}
+
+.ess-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #6b4c7a;
+    background: #fff;
+    color: #6b4c7a;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.12s ease, color 0.12s ease;
+    box-shadow: none;
+}
+
+.ess-chip:hover {
+    background: #8b7297; /* Lighter purple */
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(107, 76, 122, 0.2);
+    transform: translateY(-1px);
+}
+
+.ess-chip--active {
+    background: #6b4c7a;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(107, 76, 122, 0.2);
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.ess-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.25rem;
+    border: 1px solid #6b4c7a;
+    background: #fff;
+    color: #6b4c7a;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow: none;
+    transition: all 0.1s ease;
+}
+
+.ess-btn:hover {
+    background: #8b7297; /* Lighter purple */
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(107, 76, 122, 0.2);
+    transform: translateY(-1px);
+}
+
+.ess-btn--primary {
+    background: #6b4c7a;
+    color: #fff;
+    border-color: #5a3e68;
+    box-shadow: 0 2px 4px rgba(107, 76, 122, 0.15);
+}
+
+.ess-btn--primary:hover {
+    background: #5a3e68;
+    box-shadow: 0 4px 12px rgba(107, 76, 122, 0.25);
+    transform: translateY(-2px);
+}
+
+.ess-btn--danger {
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+.ess-btn--danger:hover {
+    background: #dc2626;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+/* ── Tables ───────────────────────────────────────────────── */
+.ess-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.ess-table th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6b4c7a; /* Primary purple */
+    padding: 0.5rem 0.75rem;
+    border-bottom: 2px solid #6b4c7a; /* Primary purple */
+}
+
+.ess-table td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #e0e0e0;
+    font-variant-numeric: tabular-nums;
+    color: #354224; /* Dark text */
+}
+
+.ess-table tr:hover td {
+    background: #f5f5f5;
+}
+
+/* ── Status badges ────────────────────────────────────────── */
+.ess-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1.5px solid currentColor;
+    border-radius: 3px;
+}
+
+.ess-badge--draft    { color: #999; }
+.ess-badge--confirm  { color: #f59e0b; }
+.ess-badge--validate { color: #10b981; }
+.ess-badge--refuse   { color: #dc2626; }
+.ess-badge--reported { color: #f59e0b; }
+.ess-badge--approved { color: #10b981; }
+.ess-badge--done     { color: #10b981; }
+
+
+/* ── Leave balance progress ───────────────────────────────── */
+.ess-leave-bar {
+    height: 6px;
+    background: #e0e0e0;
+    margin-top: 0.4rem;
+    position: relative;
+    border-radius: 3px;
+}
+
+.ess-leave-bar__fill {
+    height: 100%;
+    background: #6b4c7a; /* Primary purple */
+    transition: width 0.4s ease;
+    border-radius: 3px;
+}
+
+/* Check-in container styling */
+.ess-checkin-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ess-checkin-container .ess-btn {
+    font-size: 1.1rem;
+}
+
+/* Form group styling */
+.ess-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+/* ...existing code... */
+.ess-clock-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.ess-clock-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.ess-clock-dot--in  { background: #10b981; }
+.ess-clock-dot--out { background: #9ca3af; }
+
+/* ── Forms ────────────────────────────────────────────────── */
+.ess-form-group {
+    margin-bottom: 1.1rem;
+}
+
+.ess-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+    color: #354224; /* Dark text */
+}
+
+.ess-input,
+.ess-select,
+.ess-textarea {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    font-family: inherit;
+    font-size: 0.88rem;
+    border-radius: 4px;
+    outline: none;
+    transition: box-shadow 0.1s, border-color 0.1s;
+}
+
+.ess-input:focus,
+.ess-select:focus,
+.ess-textarea:focus {
+    box-shadow: 0 0 0 3px rgba(107, 76, 122, 0.1); /* Primary purple focus */
+    border-color: #6b4c7a; /* Primary purple */
+}
+
+/* ── Calendar V2 (Enhanced) ──────────────────────────────── */
+.ess-calendar-v2 {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 4px;
+}
+
+.ess-calendar-v2 thead {
+    background: none;
+}
+
+.ess-calendar-v2 th {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    color: #6b4c7a;
+    padding: 0.75rem 0.5rem;
+    border: none;
+    border-bottom: 2px solid #6b4c7a;
+}
+
+.ess-calendar-v2 tbody tr {
+    height: 120px;
+}
+
+.day-cell {
+    border: 1px solid #e0e0e0;
+    padding: 0.5rem;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    vertical-align: top;
+    position: relative;
+}
+
+.day-cell:hover {
+    background: #f9f9f9;
+    box-shadow: 0 2px 8px rgba(107, 76, 122, 0.1);
+}
+
+.day-cell.day-today {
+    background: #fffde7;
+    border: 2px solid #f59e0b;
+}
+
+.day-cell.day-weekend {
+    background: #f5f5f5;
+}
+
+.day-empty {
+    background: #fafafa;
+    border: none;
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.day-number {
+    font-size: 1rem;
+    font-weight: 900;
+    color: #354224;
+}
+
+.day-cell.day-today .day-number {
+    color: #f59e0b;
+}
+
+.day-events-v2 {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.event-bar {
+    padding: 3px 6px;
+    border-radius: 2px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-left: 3px solid;
+}
+
+.event-icon {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+}
+
+.event-label {
+    flex: 1;
+    min-width: 0;
+}
+
+.event-bar--holiday {
+    background: #fee2e2;
+    color: #7f1d1d;
+    border-left-color: #dc2626;
+}
+
+.event-bar--leave {
+    background: #d1fae5;
+    color: #065f46;
+    border-left-color: #10b981;
+}
+
+.event-bar--pending {
+    background: #fef3c7;
+    color: #92400e;
+    border-left-color: #f59e0b;
+}
+
+.event-icon-legend {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+/* ── Calendar (Legacy) ─────────────────────────────────────── */
+.ess-calendar {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.ess-calendar th {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    color: #666;
+    padding: .75rem .25rem;
+    border-bottom: 2px solid #000;
+}
+
+.ess-calendar td {
+    height: 120px;
+    vertical-align: top;
+    border: 1px solid #eee;
+    padding: 4px;
+    position: relative;
+}
+
+.ess-calendar td.empty {
+    background: #f9f9f9;
+}
+
+.ess-calendar td.today {
+    background: #fffde7;
+}
+
+.ess-calendar td.weekend {
+    background: #f7f7f7;
+}
+
+.ess-calendar .day-number {
+    font-size: .8rem;
+    font-weight: 700;
+    color: #333;
+    text-align: right;
+}
+
+.ess-calendar td.today .day-number {
+    color: #c00;
+    font-weight: 900;
+}
+
+.ess-calendar .day-events {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ess-calendar .event {
+    font-size: .7rem;
+    padding: 2px 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #fff;
+}
+
+.ess-calendar .event--leave {
+    background-color: #2563eb; /* Blue */
+}
+
+.ess-calendar .event--pending {
+    background-color: #f59e0b; /* Amber */
+    color: #000;
+}
+
+.ess-calendar .event--holiday {
+    background-color: #10b981; /* Green */
+}
+
+.event-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.event-dot.event--leave { background-color: #2563eb; }
+.event-dot.event--pending { background-color: #f59e0b; }
+.event-dot.event--holiday { background-color: #10b981; }
+
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .ess-shell {
+        grid-template-columns: 1fr;
+    }
+    .ess-sidebar {
+        display: none; /* replaced by off-canvas in JS */
+    }
+    .ess-bento {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .ess-bento--wide,
+    .ess-bento--full {
+        grid-column: span 2;
+    }
+    .ess-dashboard-layout {
+        grid-template-columns: 1fr;
+    }
+    .ess-dashboard-sidebar {
+        position: static;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        width: 100%;
+    }
+}
+
+@media (max-width: 560px) {
+    .ess-bento {
+        grid-template-columns: 1fr;
+    }
+    .ess-bento--wide,
+    .ess-bento--tall,
+    .ess-bento--full {
+        grid-column: span 1;
+        grid-row: span 1;
+    }
+    .ess-main {
+        padding: 1rem;
+    }
+    .ess-dashboard-sidebar {
+        grid-template-columns: 1fr;
+    }
+    .ess-bento--compact {
+        grid-template-columns: 1fr !important;
+    }
+}

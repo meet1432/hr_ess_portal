@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ── Attendance list ──────────────────────────────────────────── -->
+    <template id="portal_attendance" name="ESS Attendance">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <!-- Page header -->
+            <div class="ess-page-header">
+                <h1>Attendance</h1>
+                <span class="ess-timestamp js-live-clock">--:--:--</span>
+            </div>
+
+            <!-- Time summary cards -->
+            <div class="ess-bento ess-bento--compact" style="margin-bottom:2rem;">
+                <!-- Check In button -->
+                <div class="ess-card js-attendance-clock"
+                     t-att-data-checked-in="1 if employee_is_checked_in else 0">
+                    <div class="ess-checkin-container">
+                        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+                            <span class="ess-clock-dot js-clock-dot"/>
+                            <span class="js-clock-status" style="font-size:0.85rem;color:#666;"/>
+                        </div>
+                        <button class="ess-btn ess-btn--primary js-clock-btn" type="button"
+                                style="width:100%;justify-content:center;padding: 0.75rem;">
+                            Check In
+                        </button>
+                        <span class="js-clock-error"
+                              style="display:none;font-size:.78rem;color:#c00;margin-top:0.5rem;"/>
+                    </div>
+                </div>
+
+                <!-- Today card -->
+                <div class="ess-card">
+                    <div class="ess-card__label">Today</div>
+                    <div class="ess-card__value">
+                        <t t-esc="'%dh %dm' % (int(today_hours), int((today_hours % 1) * 60))"/>
+                    </div>
+                    <div class="ess-card__sub">
+                        <t t-esc="today_records"/> records
+                    </div>
+                </div>
+
+                <!-- This Week card -->
+                <div class="ess-card">
+                    <div class="ess-card__label">This Week</div>
+                    <div class="ess-card__value">
+                        <t t-esc="'%dh %dm' % (int(week_hours), int((week_hours % 1) * 60))"/>
+                    </div>
+                    <div class="ess-card__sub">
+                        <t t-esc="week_records"/> records
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter section -->
+            <div class="ess-card" style="padding:1.5rem;margin-bottom:2rem;">
+                <form method="get" action="/my/attendance" style="display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap;">
+                    <div class="ess-form-group" style="flex:1;min-width:200px;">
+                        <label class="ess-label">From Date</label>
+                        <input type="date" name="date_from" class="ess-input"
+                               t-att-value="date_from"/>
+                    </div>
+                    <div class="ess-form-group" style="flex:1;min-width:200px;">
+                        <label class="ess-label">To Date</label>
+                        <input type="date" name="date_to" class="ess-input"
+                               t-att-value="date_to"/>
+                    </div>
+                    <div class="ess-form-group" style="flex:1;min-width:200px;">
+                        <label class="ess-label">Grouping</label>
+                        <select name="grouping" class="ess-select" style="cursor:pointer;">
+                            <option value="none" t-att-selected="'selected' if grouping == 'none' else ''">No Grouping</option>
+                            <option value="date" t-att-selected="'selected' if grouping == 'date' else ''">By Date</option>
+                            <option value="week" t-att-selected="'selected' if grouping == 'week' else ''">By Week</option>
+                            <option value="month" t-att-selected="'selected' if grouping == 'month' else ''">By Month</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="ess-btn ess-btn--primary">
+                        Apply
+                    </button>
+                </form>
+            </div>
+
+            <!-- Attendance History table -->
+            <div class="ess-card" style="box-shadow:none;padding:0;border:2px solid #000;">
+                <div style="padding:1.25rem;border-bottom:2px solid #000;">
+                    <h3 style="margin:0;font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:0.05em;">
+                        Attendance History
+                    </h3>
+                </div>
+                <table class="ess-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Worked</th>
+                            <th>Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-if="not attendances">
+                            <tr>
+                                <td colspan="5" style="text-align:center;color:#888;padding:2rem;">
+                                    No attendance records yet.
+                                </td>
+                            </tr>
+                        </t>
+                        <t t-foreach="attendances" t-as="att">
+                            <tr>
+                                <td>
+                                    <t t-esc="att.check_in and att.check_in.strftime('%d %b %Y') or ''"/>
+                                </td>
+                                <td>
+                                    <t t-esc="att.check_in and att.check_in.strftime('%H:%M') or ''"/>
+                                </td>
+                                <td>
+                                    <t t-if="att.check_out">
+                                        <t t-esc="att.check_out.strftime('%H:%M')"/>
+                                    </t>
+                                    <t t-else="">
+                                        <span style="color:#007a00;font-weight:700;">Active</span>
+                                    </t>
+                                </td>
+                                <td>
+                                    <t t-esc="'%.2f h' % att.worked_hours"/>
+                                </td>
+                                <td style="color:#888;">—</td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <t t-if="pager and pager.get('page_count', 1) > 1">
+                <div style="margin-top:1.5rem;">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

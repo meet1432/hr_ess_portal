@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ── Expense list ──────────────────────────────────────────────── -->
+    <template id="portal_expenses" name="ESS Expenses">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <div class="ess-page-header">
+                <h1>Expenses</h1>
+                <a class="ess-btn ess-btn--primary" href="/my/expenses/new">
+                    + New Expense
+                </a>
+            </div>
+
+            <!-- Filter chips -->
+            <div class="ess-chips" style="margin-bottom:1.5rem;">
+                <a t-att-href="'/my/expenses?state_filter=all'"
+                   t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'all' else '')">
+                    All
+                </a>
+                <a t-att-href="'/my/expenses?state_filter=draft'"
+                   t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'draft' else '')">
+                    Draft
+                </a>
+                <a t-att-href="'/my/expenses?state_filter=submitted'"
+                   t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'submitted' else '')">
+                    Pending
+                </a>
+                <a t-att-href="'/my/expenses?state_filter=approved'"
+                   t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'approved' else '')">
+                    Approved
+                </a>
+                <a t-att-href="'/my/expenses?state_filter=paid'"
+                   t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'paid' else '')">
+                    Paid
+                </a>
+                <a t-att-href="'/my/expenses?state_filter=refused'"
+                   t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'refused' else '')">
+                    Refused
+                </a>
+            </div>
+
+            <div class="ess-card" style="box-shadow:none;padding:0;">
+                <table class="ess-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-if="not expenses">
+                            <tr>
+                                <td colspan="4" style="text-align:center;color:#888;padding:2rem;">
+                                    No expenses found.
+                                </td>
+                            </tr>
+                        </t>
+                        <t t-foreach="expenses" t-as="exp">
+                            <tr>
+                                <td><strong><t t-esc="exp.name"/></strong></td>
+                                <td><t t-esc="exp.date and exp.date.strftime('%Y-%m-%d') or ''"/></td>
+                                <td>
+                                    <t t-esc="exp.total_amount"/>
+                                    <t t-esc="exp.currency_id.symbol"/>
+                                </td>
+                                <td>
+                                    <span t-att-class="'ess-badge ess-badge--' + (exp.state or 'draft')">
+                                        <t t-esc="exp.state or 'draft'"/>
+                                    </span>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+
+            <t t-if="pager and pager.get('page_count', 1) > 1">
+                <div style="margin-top:1.5rem;">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- ── Expense create form ─────────────────────────────────────── -->
+    <template id="portal_expense_new" name="ESS New Expense">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <div class="ess-page-header">
+                <h1>New Expense</h1>
+                <a class="ess-btn" href="/my/expenses">← Back</a>
+            </div>
+
+            <div class="ess-card" style="max-width:580px;">
+                <t t-if="error">
+                    <div class="ess-card" style="margin-bottom:1rem;border-color:#b00020;color:#b00020;box-shadow:none;">
+                        <t t-esc="error"/>
+                    </div>
+                </t>
+                <form action="/my/expenses/new" method="post">
+                    <input type="hidden" name="csrf_token"
+                           t-att-value="request.csrf_token()"/>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="product_id">Category</label>
+                        <select class="ess-select" name="product_id" id="product_id" required="required">
+                            <option value="">— Select —</option>
+                            <t t-foreach="categories" t-as="cat">
+                                <option t-att-value="cat.id">
+                                    <t t-esc="cat.display_name"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="amount">Amount</label>
+                        <input class="ess-input" type="number" name="amount" id="amount"
+                               step="0.01" min="0" required="required"/>
+                    </div>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="date">Date</label>
+                        <input class="ess-input" type="date" name="date" id="date"
+                               required="required"/>
+                    </div>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="description">Description</label>
+                        <textarea class="ess-textarea" name="description" id="description"
+                                  rows="3" placeholder="What was the expense for?"/>
+                    </div>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="payment_mode">Paid By</label>
+                        <select class="ess-select" name="payment_mode" id="payment_mode">
+                            <option value="own_account">Employee (to reimburse)</option>
+                            <option value="company_account">Company</option>
+                        </select>
+                    </div>
+
+                    <div style="display:flex;gap:.75rem;align-items:center;">
+                        <button class="ess-btn ess-btn--primary" type="submit">
+                            Submit Expense
+                        </button>
+                        <a class="ess-btn" href="/my/expenses">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ── Projects List ───────────────────────────────────────────── -->
+    <template id="portal_projects" name="ESS Projects">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <div class="ess-page-header">
+                <h1>Projects</h1>
+                <a class="ess-btn ess-btn--primary" href="/my/timesheets/weekly">
+                    ⏱ Timesheets
+                </a>
+            </div>
+
+            <div style="margin-bottom:1.5rem;color:#666;font-size:0.9rem;">
+                Browse projects and log time. Click a project to see its tasks.
+            </div>
+
+            <!-- Projects Grid -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:1.5rem;">
+                <t t-if="not projects">
+                    <div class="ess-card" style="grid-column:1/-1;text-align:center;color:#888;">
+                        No projects available yet.
+                    </div>
+                </t>
+                <t t-foreach="projects" t-as="proj">
+                    <a t-att-href="'/ess/projects/%d' % proj.id" class="ess-card" style="cursor:pointer;text-decoration:none;display:flex;flex-direction:column;transition:all 0.2s;">
+                        <div style="font-weight:700;color:#2c3e50;font-size:1rem;margin-bottom:0.5rem;">
+                            📌 <t t-esc="proj.name"/>
+                        </div>
+                        <div style="color:#666;font-size:0.85rem;flex:1;margin-bottom:0.75rem;">
+                            <t t-esc="proj.description or 'No description'"/>
+                        </div>
+                        <div style="font-size:0.75rem;color:#27ae60;font-weight:600;">
+                            <t t-esc="len(proj.task_ids)"/> tasks →
+                        </div>
+                    </a>
+                </t>
+            </div>
+
+            <!-- Pager -->
+            <t t-if="pager and pager.get('page_count', 1) > 1">
+                <div style="margin-top:1.5rem;display:flex;gap:.5rem;">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- ── Project Details ─────────────────────────────────────────── -->
+    <template id="portal_project_detail" name="ESS Project Detail">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <div class="ess-page-header">
+                <h1><t t-esc="project.name"/></h1>
+                <a class="ess-btn" href="/ess/projects">← Back to Projects</a>
+            </div>
+
+            <!-- Project Info -->
+            <div class="ess-card" style="margin-bottom:1.5rem;">
+                <div style="margin-bottom:1rem;">
+                    <strong style="font-size:0.9rem;color:#6b4c7a;text-transform:uppercase;">Description</strong>
+                    <div style="margin-top:0.5rem;color:#555;">
+                        <t t-esc="project.description or 'No description provided'"/>
+                    </div>
+                </div>
+                <hr style="border-color:#ddd;margin:1rem 0;"/>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-size:0.85rem;">
+                    <div>
+                        <strong style="color:#6b4c7a;text-transform:uppercase;">Manager</strong>
+                        <div style="color:#555;margin-top:0.25rem;">
+                            <t t-esc="project.user_id.name or '—'"/>
+                        </div>
+                    </div>
+                    <div>
+                        <strong style="color:#6b4c7a;text-transform:uppercase;">Tasks</strong>
+                        <div style="color:#27ae60;font-weight:600;margin-top:0.25rem;">
+                            <t t-esc="len(project.task_ids)"/> active tasks
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Table -->
+            <div style="margin-bottom:1.5rem;">
+                <h2 style="font-size:1.1rem;margin-bottom:1rem;">Tasks</h2>
+                <div class="ess-card" style="box-shadow:none;padding:0;">
+                    <table class="ess-table">
+                        <thead>
+                            <tr>
+                                <th>Task Name</th>
+                                <th>Stage</th>
+                                <th>Assigned To</th>
+                                <th>Progress</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-if="not tasks">
+                                <tr>
+                                    <td colspan="4" style="text-align:center;color:#888;padding:2rem;">
+                                        No tasks for this project.
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-foreach="tasks" t-as="task">
+                                <tr>
+                                    <td><strong><t t-esc="task.name"/></strong></td>
+                                    <td>
+                                        <span class="ess-badge" style="background:#3498db;color:white;padding:0.25rem 0.5rem;border-radius:3px;font-size:0.75rem;">
+                                            <t t-esc="task.stage_id.name or 'New'"/>
+                                        </span>
+                                    </td>
+                                    <td><t t-esc="task.user_ids[0].name if task.user_ids else '—'"/></td>
+                                    <td>
+                                        <div style="background:#ecf0f1;border-radius:3px;overflow:hidden;height:1.5rem;display:flex;align-items:center;position:relative;">
+                                            <div t-att-style="'background:#27ae60;height:100%;width:' + str(int(task.progress or 0)) + '%;'"></div>
+                                            <span style="position:absolute;width:100%;text-align:center;font-size:0.7rem;font-weight:600;color:#555;">
+                                                <t t-esc="int(task.progress or 0)"/>%
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pager -->
+            <t t-if="pager and pager.get('page_count', 1) > 1">
+                <div style="margin-top:1.5rem;display:flex;gap:.5rem;">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+
+            <div style="display:flex;gap:1rem;margin-top:2rem;">
+                <a class="ess-btn" href="/ess/projects">View All Projects</a>
+                <a class="ess-btn ess-btn--primary" href="/my/timesheets/weekly">Log Time</a>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- wizard/leave_request_views.xml
+     ================================
+     Backend wizard for HR managers to bulk-link portal users to employees.
+     Displayed in the Employees app under Configuration → Portal Setup.
+-->
+<odoo>
+    <data>
+        <!-- Placeholder: add TransientModel + Form view here for
+             hr.ess.portal.setup.wizard if bulk-linking is needed. -->
+    </data>
+</odoo>

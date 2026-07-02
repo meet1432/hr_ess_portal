@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ── Timesheet List ───────────────────────────────────────────── -->
+    <template id="portal_timesheets" name="ESS Timesheets">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <div class="ess-page-header">
+                <h1>Timesheets</h1>
+                <div style="display:flex;gap:0.75rem;">
+                    <a class="ess-btn" href="/my/timesheets/weekly">
+                        📅 Weekly View
+                    </a>
+                    <a class="ess-btn ess-btn--primary" href="/my/timesheets/new">
+                        + New Entry
+                    </a>
+                </div>
+            </div>
+
+            <t t-if="error">
+                <div class="ess-card" style="margin-bottom:1rem;border-color:#b00020;color:#b00020;">
+                    <t t-esc="error"/>
+                </div>
+            </t>
+
+            <!-- Filter tabs -->
+            <div style="display:flex;gap:1rem;margin-bottom:1rem;">
+                <div class="ess-chips">
+                    <a t-att-href="'/my/timesheets?state_filter=all'"
+                       t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'all' else '')">All</a>
+                    <a t-att-href="'/my/timesheets?state_filter=pending'"
+                       t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'pending' else '')">Pending</a>
+                    <a t-att-href="'/my/timesheets?state_filter=submitted'"
+                       t-att-class="'ess-chip ' + ('ess-chip--active' if state_filter == 'submitted' else '')">Submitted</a>
+                </div>
+            </div>
+
+            <!-- Timesheet table -->
+            <div class="ess-card" style="box-shadow:none;padding:0;">
+                <table class="ess-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Project</th>
+                            <th>Task</th>
+                            <th>Hours</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-if="not timesheets">
+                            <tr>
+                                <td colspan="7" style="text-align:center;color:#888;padding:2rem;">
+                                    No timesheet entries found.
+                                </td>
+                            </tr>
+                        </t>
+                        <t t-foreach="timesheets" t-as="ts">
+                            <tr>
+                                <td><strong><t t-esc="ts.date.strftime('%Y-%m-%d')"/></strong></td>
+                                <td><t t-esc="ts.project_id.name or '—'"/></td>
+                                <td><t t-esc="ts.task_id.name or '—'"/></td>
+                                <td><strong><t t-esc="'%.1f' % ts.unit_amount"/>h</strong></td>
+                                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">
+                                    <t t-esc="ts.name"/>
+                                </td>
+                                <td>
+                                    <span t-att-class="'ess-badge ' + ('ess-badge--validate' if ts.is_submitted else 'ess-badge--confirm')">
+                                        <t t-esc="'Submitted' if ts.is_submitted else 'Pending'"/>
+                                    </span>
+                                </td>
+                                <td>
+                                    <t t-if="not ts.is_submitted">
+                                        <button class="ess-btn ess-btn--primary"
+                                                style="padding:.3rem .7rem;font-size:.72rem;"
+                                                t-att-data-timesheet-id="ts.id"
+                                                onclick="submitTimesheet(this)">
+                                            Submit
+                                        </button>
+                                    </t>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pager -->
+            <t t-if="pager and pager.get('page_count', 1) > 1">
+                <div style="margin-top:1.5rem;display:flex;gap:.5rem;">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+
+            <script>
+                async function submitTimesheet(btn) {
+                    const timesheetId = btn.dataset.timesheetId;
+                    if (!confirm('Submit this timesheet entry?')) return;
+                    const resp = await fetch('/my/timesheets/submit', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({jsonrpc:'2.0',method:'call',id:1,
+                            params:{timesheet_id: parseInt(timesheetId)}})
+                    });
+                    const data = await resp.json();
+                    if (data.result &amp;&amp; data.result.success) {
+                        window.location.reload();
+                    } else {
+                        alert((data.result &amp;&amp; data.result.error) || 'Failed to submit timesheet.');
+                    }
+                }
+            </script>
+        </t>
+    </template>
+
+    <!-- ── Timesheet Create Form ───────────────────────────────────── -->
+    <template id="portal_timesheet_new" name="ESS New Timesheet">
+        <t t-call="hr_ess_portal.portal_ess_layout">
+            <div class="ess-page-header">
+                <h1>New Timesheet Entry</h1>
+                <a class="ess-btn" href="/my/timesheets">← Back</a>
+            </div>
+
+            <div class="ess-card" style="max-width:580px;">
+                <t t-if="error">
+                    <div class="ess-card" style="margin-bottom:1rem;border-color:#b00020;color:#b00020;box-shadow:none;">
+                        <t t-esc="error"/>
+                    </div>
+                </t>
+                <form action="/my/timesheets/new" method="post">
+                    <input type="hidden" name="csrf_token"
+                           t-att-value="request.csrf_token()"/>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="date">Date</label>
+                        <input class="ess-input" type="date" name="date" id="date" required="required"/>
+                    </div>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="project_id">Project *</label>
+                        <select class="ess-select" name="project_id" id="project_id" required="required">
+                            <option value="">— Select —</option>
+                            <t t-foreach="projects" t-as="proj">
+                                <option t-att-value="proj.id">
+                                    <t t-esc="proj.name"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="task_id">Task (optional)</label>
+                        <select class="ess-select" name="task_id" id="task_id">
+                            <option value="">— Select —</option>
+                        </select>
+                        <div style="font-size:.75rem;color:#666;margin-top:.3rem;">
+                            Tasks will load based on selected project
+                        </div>
+                    </div>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="hours">Hours *</label>
+                        <input class="ess-input" type="number" name="hours" id="hours"
+                               min="0.25" max="24" step="0.25" placeholder="e.g., 8" required="required"/>
+                        <div style="font-size:.75rem;color:#666;margin-top:.3rem;">
+                            Enter hours worked (0.25 - 24)
+                        </div>
+                    </div>
+
+                    <div class="ess-form-group">
+                        <label class="ess-label" for="description">Description (optional)</label>
+                        <textarea class="ess-textarea" name="description" id="description"
+                                  rows="3" placeholder="What did you work on?"></textarea>
+                    </div>
+
+                    <div style="display:flex;gap:.75rem;align-items:center;">
+                        <button class="ess-btn ess-btn--primary" type="submit">
+                            Create Entry
+                        </button>
+                        <a class="ess-btn" href="/my/timesheets">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </t>
+    </template>
+</odoo>

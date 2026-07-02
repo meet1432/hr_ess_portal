@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    data/portal_menu_data.xml
+    =========================
+    No backend menu items are added for portal users.
+    This file is a placeholder for any future ir.config_parameter
+    or ir.cron records (e.g., payslip notification cron).
+-->
+<odoo>
+    <data noupdate="0">
+        <!-- Intentionally empty: portal routes are self-registering -->
+    </data>
+</odoo>

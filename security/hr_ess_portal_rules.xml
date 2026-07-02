@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    security/hr_ess_portal_rules.xml
+    =================================
+    Record rules restrict portal users to their OWN data rows.
+    The domain 'employee_id.user_id = uid' is the canonical pattern for HR
+    portal access in Odoo 17+/19.
+
+    IMPORTANT
+    =========
+    - These rules are additive to any existing group rules.
+    - We scope every rule to base.group_portal so internal employees
+      (group_user) are never restricted by these domains.
+    - Never use global=True here; that would lock out admins.
+-->
+<odoo>
+    <data noupdate="1">
+
+        <!-- ── hr.employee ─────────────────────────────────────────── -->
+        <record id="rule_hr_employee_portal_own" model="ir.rule">
+            <field name="name">Portal: employee may read own record only</field>
+            <field name="model_id" ref="hr.model_hr_employee"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ── hr.leave ────────────────────────────────────────────── -->
+        <record id="rule_hr_leave_portal_own" model="ir.rule">
+            <field name="name">Portal: employee may CRUD own leaves only</field>
+            <field name="model_id" ref="hr_holidays.model_hr_leave"/>
+            <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ── hr.leave.allocation ─────────────────────────────────── -->
+        <record id="rule_hr_leave_alloc_portal_own" model="ir.rule">
+            <field name="name">Portal: employee may read own allocations</field>
+            <field name="model_id" ref="hr_holidays.model_hr_leave_allocation"/>
+            <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ── hr.attendance ───────────────────────────────────────── -->
+        <record id="rule_hr_attendance_portal_own" model="ir.rule">
+            <field name="name">Portal: employee may read/create own attendance</field>
+            <field name="model_id" ref="hr_attendance.model_hr_attendance"/>
+            <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ── hr.payslip ──────────────────────────────────────────── -->
+        <record id="rule_hr_payslip_portal_own" model="ir.rule">
+            <field name="name">Portal: employee reads own done/paid payslips</field>
+            <field name="model_id" ref="hr_payroll.model_hr_payslip"/>
+            <field name="domain_force">[
+                ('employee_id.user_id', '=', user.id),
+                ('state', 'in', ['done', 'paid'])
+            ]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ── hr.expense ──────────────────────────────────────────── -->
+        <record id="rule_hr_expense_portal_own" model="ir.rule">
+            <field name="name">Portal: employee CRUD own expenses</field>
+            <field name="model_id" ref="hr_expense.model_hr_expense"/>
+            <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ── hr.attendance.correction ────────────────────────────── -->
+        <record id="rule_hr_attendance_correction_portal_own" model="ir.rule">
+            <field name="name">Portal: employee creates/reads own corrections</field>
+            <field name="model_id" ref="hr_ess_portal.model_hr_attendance_correction"/>
+            <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ── project.project ─────────────────────────────────────── -->
+        <record id="rule_project_portal_read" model="ir.rule">
+            <field name="name">Portal: employee may read active projects</field>
+            <field name="model_id" ref="project.model_project_project"/>
+            <field name="domain_force">[('active', '=', True), ('allow_timesheets', '=', True)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ── project.task ────────────────────────────────────────── -->
+        <record id="rule_project_task_portal_read" model="ir.rule">
+            <field name="name">Portal: employee may read active tasks</field>
+            <field name="model_id" ref="project.model_project_task"/>
+            <field name="domain_force">[('active', '=', True)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ── account.analytic.line (timesheets) ──────────────────── -->
+        <record id="rule_analytic_line_portal_own" model="ir.rule">
+            <field name="name">Portal: employee CRUD own timesheet entries</field>
+            <field name="model_id" ref="analytic.model_account_analytic_line"/>
+            <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

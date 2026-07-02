@@ -70,6 +70,49 @@ A modern, comprehensive Employee Self-Service portal for Odoo 19 Enterprise Edit
 - User sees only their own records
 - Strict domain filtering on all queries
 
+## Screenshots
+
+### Dashboard
+![Dashboard Overview](screenshots/01-dashboard.png)
+*Quick overview of pending requests, leave balance, and quick-action buttons*
+
+### Leave Management
+![Leave Request Form](screenshots/02-leave-request.png)
+*Request leave with approval workflow*
+
+### Attendance & Time Tracking
+![Attendance Clock](screenshots/03-attendance-clock.png)
+*Clock in/out directly from the portal*
+
+![Attendance Correction](screenshots/04-attendance-correction.png)
+*View attendance records and corrections*
+
+### Timesheets
+![Weekly Timesheet View](screenshots/05-timesheet-weekly.png)
+*Modern weekly calendar view for logging hours by project*
+
+![Timesheet Quick Entry](screenshots/06-timesheet-modal.png)
+*Quick modal for adding/editing timesheet entries*
+
+### Payslips
+![Payslip Download](screenshots/07-payslips.png)
+*View and download payslips as PDF*
+
+### Expense Management
+![Expense Submission](screenshots/08-expense-form.png)
+*Submit expense claims with receipt attachments*
+
+### Projects & Tasks
+![Projects List](screenshots/09-projects.png)
+*Browse active projects and assigned work*
+
+![Tasks View](screenshots/10-tasks.png)
+*View assigned tasks with priority and progress*
+
+### Calender View
+![Calender View](screenshots/11-calender-view.png)
+*Fully responsive design works seamlessly on mobile devices*
+
 ## Installation
 
 ### Requirements

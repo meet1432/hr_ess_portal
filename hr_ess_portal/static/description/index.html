@@ -25,6 +25,22 @@
             background: white;
         }
 
+        .hero-banner {
+            margin-bottom: 2rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #6b4c7a;
+            box-shadow: 0 6px 18px rgba(107, 76, 122, 0.12);
+        }
+
+        .hero-banner img {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+        }
+
         h1 {
             font-size: 2.5rem;
             color: #6b4c7a;
@@ -274,7 +290,7 @@
 
         .screenshots-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
             margin-top: 1.5rem;
         }
@@ -285,6 +301,7 @@
             overflow: hidden;
             background: #f9f9f9;
             transition: all 0.3s ease;
+            min-width: 0;
         }
 
         .screenshot-item:hover {
@@ -297,6 +314,7 @@
             height: auto;
             display: block;
             background: #fff;
+            max-width: 100%;
         }
 
         .screenshot-caption {
@@ -327,11 +345,18 @@
             .tech-items {
                 grid-template-columns: 1fr;
             }
+
+            .screenshots-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="hero-banner">
+            <img src="cover.png" alt="Employee Self-Service Portal banner">
+        </div>
         <h1>Employee Self-Service Portal (ESS)</h1>
         <p class="subtitle">Modern Neo-Brutalist Employee Self-Service Portal for Odoo 19 Enterprise Edition</p>
 

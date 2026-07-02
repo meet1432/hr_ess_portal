@@ -2,6 +2,14 @@
 
 A modern, comprehensive Employee Self-Service portal for Odoo 19 Enterprise Edition with a clean Neo-Brutalist design.
 
+## 💰 Key Objectives
+
+- **Reduce Internal User License Costs** - Portal users don't require Odoo internal user licenses, saving significant costs while maintaining full HR functionality
+- **Improve Employee Experience** - Intuitive, self-service workflows reduce HR department burden
+- **Enhance Data Accessibility** - Employees can access their HR data 24/7 without HR intervention
+- **Streamline HR Processes** - Automated workflows for leave, attendance, and expenses
+- **Maintain Security** - Enterprise-grade row-level security ensures data isolation
+
 ## Features
 
 ### 🎯 Core Modules

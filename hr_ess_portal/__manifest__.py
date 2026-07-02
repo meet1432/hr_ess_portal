@@ -33,7 +33,7 @@
         <p><strong>Requires:</strong> Odoo 19 Enterprise Edition</p>
         <p><strong>Repository:</strong> Fully open-source on GitHub with contribution guidelines</p>
     """,
-    'author': 'Meet1432',
+    'author': 'meet1432',
     'website': 'https://github.com/meet1432/hr-ess-portal',
     'category': 'Human Resources',
     'license': 'LGPL-3',
